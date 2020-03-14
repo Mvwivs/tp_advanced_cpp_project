@@ -69,7 +69,7 @@ void Process::writeExact(const void* data, size_t len){
 	ssize_t written = 0;
 	const char* d = static_cast<const char*>(data);
 	while (len - written != 0) {
-		written = write(d + written, len - written);
+		written += write(d + written, len - written);
 	}
 }
 
@@ -85,7 +85,7 @@ void Process::readExact(void* data, size_t len) {
 	ssize_t recieved = 0;
 	char* d = static_cast<char*>(data);
 	while (len - recieved != 0) {
-		recieved = read(d + recieved, len - recieved);
+		recieved += read(d + recieved, len - recieved); // maybe check for eof?
 	}
 }
 
