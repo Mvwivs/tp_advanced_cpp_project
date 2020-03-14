@@ -5,6 +5,8 @@
 #include <string>
 #include <memory>
 
+#include <sys/wait.h>
+
 #include "Pipe.hpp"
 
 using namespace std::string_literals;
@@ -23,14 +25,21 @@ public:
 	void closeStdin();
 
 	void close();
+
+	int join();
+	void kill();
+
 private:
 	DoubleDescriptor descriptor;
+	pid_t pid;
 };
 
-Process::Process(const std::string& path) {
+Process::Process(const std::string& path) :
+	pid(-1) {
+
 	auto [parent, child] = createPipe();
 
-	pid_t pid = fork();
+	pid = fork();
 	if (pid < 0) {
 		throw std::runtime_error("Error, unable to fork: "s + std::strerror(errno));
 	}
@@ -45,7 +54,7 @@ Process::Process(const std::string& path) {
 		}
 		catch (const std::exception& e) {
 			child.close();
-			exit(EXIT_FAILURE); // may be print exception?
+			exit(EXIT_FAILURE); // maybe print exception?
 		}
 	}
 	else { // parent
@@ -55,6 +64,7 @@ Process::Process(const std::string& path) {
 
 Process::~Process() {
 	close();
+	kill(); // maybe wait?
 }
 
 size_t Process::write(const void* data, size_t len) {
@@ -90,7 +100,24 @@ void Process::readExact(void* data, size_t len) {
 }
 
 bool Process::isReadable() const {
+	return descriptor.isInAvailable();
+}
 
+int Process::join() {
+	int returnStatus = EXIT_FAILURE;
+	if (pid != -1) {
+    	pid_t res = waitpid(pid, &returnStatus, 0);
+		if (res != -1) {
+			pid = -1;
+		}
+	}
+	return returnStatus;
+}
+
+void Process::kill() {
+	if (pid != -1) {
+		::kill(pid, SIGKILL); // maybe check return status?
+	}
 }
 
 void Process::closeStdin() {

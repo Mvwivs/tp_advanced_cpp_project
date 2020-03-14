@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include <unistd.h>
+#include <fcntl.h>
 
 using namespace std::string_literals;
 
@@ -56,6 +57,10 @@ public:
 		close_d(out);
 	}
 
+	bool isInAvailable() const {
+		return fcntl(in, F_GETFD) != -1 || errno != EBADF;
+	}
+
 	size_t write(const void* data, size_t len) override {
 		return ::write(out, data, len);
 	}
@@ -94,7 +99,9 @@ private:
 
 };
 
-inline std::pair<DoubleDescriptor, DoubleDescriptor> createPipe() {
+using Pipe = std::pair<DoubleDescriptor, DoubleDescriptor>;
+
+inline Pipe createPipe() {	// TODO: replace with factory
 	int readpipe[2] = {-1, -1};
 	int writepipe[2] = {-1, -1};
 	if (pipe(readpipe) < 0 || pipe(writepipe) < 0) {
@@ -115,5 +122,3 @@ inline std::pair<DoubleDescriptor, DoubleDescriptor> createPipe() {
 		DoubleDescriptor{writepipe[0], readpipe[1]}
 	};
 }
-
-
