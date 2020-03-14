@@ -6,7 +6,7 @@
 #include "process/Process.hpp"
 
 int main() {
-	Process p("./echoer");
+	process::Process p("./echoer");
 
 	constexpr std::size_t data_len = 1000;
 

@@ -9,6 +9,8 @@
 
 #include "Pipe.hpp"
 
+namespace process {
+
 using namespace std::string_literals;
 
 class Process {
@@ -33,6 +35,10 @@ private:
 	DoubleDescriptor descriptor;
 	pid_t pid;
 };
+
+} // namespace process
+
+namespace process {
 
 Process::Process(const std::string& path) :
 	pid(-1) {
@@ -127,3 +133,5 @@ void Process::closeStdin() {
 void Process::close() {
 	descriptor.close();
 }
+
+} // namespace process

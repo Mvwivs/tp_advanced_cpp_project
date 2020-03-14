@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+namespace process {
+
 using namespace std::string_literals;
 
 class Descriptor {
@@ -122,3 +124,5 @@ inline Pipe createPipe() {	// TODO: replace with factory
 		DoubleDescriptor{writepipe[0], readpipe[1]}
 	};
 }
+
+} // namespace process
