@@ -35,10 +35,18 @@ Process::Process(const std::string& path) {
 		throw std::runtime_error("Error, unable to fork: "s + std::strerror(errno));
 	}
 	else if (pid == 0) { // child
-		child.toCinCout();
-		execl(path.c_str(), path.c_str(), (char*)NULL);
-		// if execl failed
-		throw std::runtime_error("Error, exec wasn't called: "s + std::strerror(errno));
+		try {
+			close();
+			parent.close();
+			child.toCinCout();
+			execl(path.c_str(), path.c_str(), (char*)NULL);
+			// if execl failed
+			throw std::runtime_error("Error, exec wasn't called: "s + std::strerror(errno));
+		}
+		catch (const std::exception& e) {
+			child.close();
+			exit(EXIT_FAILURE); // may be print exception?
+		}
 	}
 	else { // parent
 		descriptor = std::move(parent);
@@ -58,7 +66,11 @@ size_t Process::write(const void* data, size_t len) {
 }
 
 void Process::writeExact(const void* data, size_t len){
-
+	ssize_t written = 0;
+	const char* d = static_cast<const char*>(data);
+	while (len - written != 0) {
+		written = write(d + written, len - written);
+	}
 }
 
 size_t Process::read(void* data, size_t len) {
@@ -70,7 +82,11 @@ size_t Process::read(void* data, size_t len) {
 }
 
 void Process::readExact(void* data, size_t len) {
-
+	ssize_t recieved = 0;
+	char* d = static_cast<char*>(data);
+	while (len - recieved != 0) {
+		recieved = read(d + recieved, len - recieved);
+	}
 }
 
 bool Process::isReadable() const {

@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include <string>
+#include <vector>
 #include <cassert>
 
 #include "process/Process.hpp"
@@ -8,20 +8,20 @@
 int main() {
 	Process p("./echoer");
 
-	std::string data = "Test data to send";
-	auto written = p.write(data.data(), data.size());
-	p.closeStdin();
-	std::cout << "Written: " << written << std::endl;
+	constexpr std::size_t data_len = 2048;
 
-	char buff[1024] = {};
-	auto read = p.read(buff, data.size());
-	std::cout << "Read: " << read << std::endl;
-	std::string recieved(buff);
+	std::vector<char> data(data_len, 'z');
+	p.writeExact(data.data(), data.size());
+	p.closeStdin();
+
+	char buff[data_len] = {};
+	p.readExact(buff, data.size());
+	std::vector<char> recieved(buff, buff + data.size());
 	if (recieved == data) {
 		std::cout << "Success" << std::endl;
 	}
 	else {
-		std::cout << data << " != " << recieved << std::endl;
+		std::cout << "Failed" << std::endl;
 	}
 
 	return 0;
