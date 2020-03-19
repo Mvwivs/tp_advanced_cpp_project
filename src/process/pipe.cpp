@@ -14,8 +14,8 @@ DuplexDescriptor::DuplexDescriptor(int input, int output) :
 }
 
 DuplexDescriptor::DuplexDescriptor(DuplexDescriptor&& other):
-	in(other.in),
-	out(other.out) {
+	in(std::move(other.in)),
+	out(std::move(other.out)) {
 	other.in = -1;
 	other.out = -1;
 }

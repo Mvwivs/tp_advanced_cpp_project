@@ -26,14 +26,10 @@ public:
 class DuplexDescriptor : public Descriptor {
 public:
 	explicit DuplexDescriptor();
-
 	DuplexDescriptor(const DuplexDescriptor& other) = delete;
 	DuplexDescriptor& operator=(const DuplexDescriptor& other) = delete;
-
 	DuplexDescriptor(DuplexDescriptor&& other);
-
 	DuplexDescriptor& operator=(DuplexDescriptor&& other);
-
 	~DuplexDescriptor();
 
 	explicit DuplexDescriptor(int input, int output);
