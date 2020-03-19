@@ -52,13 +52,13 @@ size_t DuplexDescriptor::read(void* data, size_t len) {
 	return ::read(in, data, len);
 }
 
-void DuplexDescriptor::toCinCout() {
-	if (dup2(in, STDIN_FILENO) < 0) {
-		throw std::runtime_error("Error, unable to redirect to cin: "s + std::strerror(errno));
+void DuplexDescriptor::redirectToStd() {
+	if (dup2(in, STDIN_FILENO) < 0) {	// replace stdin
+		throw std::runtime_error("Error, unable to redirect to stdin: "s + std::strerror(errno));
 	}
 	closeDescriptor(in);
-	if (dup2(out, STDOUT_FILENO) < 0) {
-		throw std::runtime_error("Error, unable to redirect to cout: "s + std::strerror(errno));
+	if (dup2(out, STDOUT_FILENO) < 0) {	// replace stdout
+		throw std::runtime_error("Error, unable to redirect to stdout: "s + std::strerror(errno));
 	}
 	closeDescriptor(out);
 }
@@ -78,7 +78,7 @@ void DuplexDescriptor::closeDescriptor(int& fd) {
 Pipe createPipe() {	// TODO: replace with factory
 	int readpipe[2] = {-1, -1};
 	int writepipe[2] = {-1, -1};
-	if (pipe(readpipe) < 0 || pipe(writepipe) < 0) {
+	if (pipe(readpipe) < 0 || pipe(writepipe) < 0) { // create two pipes
 		for (int fd : readpipe) {
 			if (fd != -1) {
 				::close(fd);
@@ -92,8 +92,8 @@ Pipe createPipe() {	// TODO: replace with factory
 		throw std::runtime_error("Error, unable to create pipes: "s + std::strerror(errno));
 	}
 	return {
-		DuplexDescriptor{readpipe[0], writepipe[1]},
-		DuplexDescriptor{writepipe[0], readpipe[1]}
+		DuplexDescriptor{ readpipe[0], writepipe[1] },
+		DuplexDescriptor{ writepipe[0], readpipe[1] }
 	};
 }
 

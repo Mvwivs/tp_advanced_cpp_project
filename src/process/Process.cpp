@@ -16,7 +16,7 @@ Process::Process(const std::string& path) :
 		try {
 			close();
 			parent.close();
-			child.toCinCout();
+			child.redirectToStd();
 			execl(path.c_str(), path.c_str(), (char*)NULL);
 			// if execl failed
 			throw std::runtime_error("Error, exec wasn't called: "s + std::strerror(errno));
