@@ -12,13 +12,15 @@ int main() {
 
 	std::vector<char> data(data_len, 'z');
 	p.writeExact(data.data(), data.size());
-	std::cerr << "finished writing" << std::endl;
+	std::cout << "finished writing" << std::endl;
+
 	p.closeStdin();
-	std::cerr << "finished closing" << std::endl;
+	std::cout << "closed socket" << std::endl;
 
 	char buff[data_len] = {};
 	p.readExact(buff, data.size());
-	std::cerr << "finished reading" << std::endl;
+	std::cout << "finished reading" << std::endl;
+
 	std::vector<char> recieved(buff, buff + data.size());
 	if (recieved == data) {
 		std::cout << "Success" << std::endl;
