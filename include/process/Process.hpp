@@ -50,8 +50,8 @@ public:
 	void kill();
 
 private:
-	DuplexDescriptor descriptor;	// Desciptor used to commuticate with child
-	pid_t pid;						// pid of child process
+	DuplexDescriptor descriptor_;	// Desciptor used to commuticate with child
+	pid_t pid_;						// pid of child process
 };
 
 } // namespace process

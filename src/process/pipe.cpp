@@ -6,27 +6,27 @@ namespace process {
 using namespace std::string_literals; // 's' literal for exceptions
 
 DuplexDescriptor::DuplexDescriptor() :
-	in(-1),
-	out(-1) {
+	in_(-1),
+	out_(-1) {
 }
 
 DuplexDescriptor::DuplexDescriptor(int input, int output) :
-	in(input),
-	out(output) {
+	in_(input),
+	out_(output) {
 }
 
 DuplexDescriptor::DuplexDescriptor(DuplexDescriptor&& other):
-	in(other.in),
-	out(other.out) {
-	other.in = -1;
-	other.out = -1;
+	in_(other.in_),
+	out_(other.out_) {
+	other.in_ = -1;
+	other.out_ = -1;
 }
 
 DuplexDescriptor& DuplexDescriptor::operator=(DuplexDescriptor&& other) {
-	in = other.in;
-	out = other.out;
-	other.in = -1;
-	other.out = -1;
+	in_ = other.in_;
+	out_ = other.out_;
+	other.in_ = -1;
+	other.out_ = -1;
 	return *this;
 }
 
@@ -35,39 +35,39 @@ DuplexDescriptor::~DuplexDescriptor() {
 };
 
 void DuplexDescriptor::closeIn() {
-	closeDescriptor(in);
+	closeDescriptor(in_);
 }
 
 void DuplexDescriptor::closeOut() {
-	closeDescriptor(out);
+	closeDescriptor(out_);
 }
 
 bool DuplexDescriptor::isInAvailable() const {
-	return fcntl(in, F_GETFD) != -1 || errno != EBADF;
+	return fcntl(in_, F_GETFD) != -1 || errno != EBADF;
 }
 
 size_t DuplexDescriptor::write(const void* data, size_t len) {
-	return ::write(out, data, len);
+	return ::write(out_, data, len);
 }
 
 size_t DuplexDescriptor::read(void* data, size_t len) {
-	return ::read(in, data, len);
+	return ::read(in_, data, len);
 }
 
 void DuplexDescriptor::redirectToStd() {
-	if (dup2(in, STDIN_FILENO) < 0) {	// replace stdin
+	if (dup2(in_, STDIN_FILENO) < 0) {	// replace stdin
 		throw std::runtime_error("Error, unable to redirect to stdin: "s + std::strerror(errno));
 	}
-	closeDescriptor(in);
-	if (dup2(out, STDOUT_FILENO) < 0) {	// replace stdout
+	closeDescriptor(in_);
+	if (dup2(out_, STDOUT_FILENO) < 0) {	// replace stdout
 		throw std::runtime_error("Error, unable to redirect to stdout: "s + std::strerror(errno));
 	}
-	closeDescriptor(out);
+	closeDescriptor(out_);
 }
 
 void DuplexDescriptor::close() {
-	closeDescriptor(in);
-	closeDescriptor(out);
+	closeDescriptor(in_);
+	closeDescriptor(out_);
 }
 
 void DuplexDescriptor::closeDescriptor(int& fd) {

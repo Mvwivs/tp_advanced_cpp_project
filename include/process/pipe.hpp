@@ -51,8 +51,8 @@ private:
 	static void closeDescriptor(int& fd);
 
 private:
-	int in;		// Input (read) descriptor
-	int out;	// Output (write) descriptor
+	int in_;		// Input (read) descriptor
+	int out_;	// Output (write) descriptor
 
 };
 

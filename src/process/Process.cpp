@@ -6,15 +6,15 @@ namespace process {
 using namespace std::string_literals; // 's' literal for exceptions
 
 Process::Process(const std::string& path) :
-	pid(-1) {
+	pid_(-1) {
 
 	auto [parent, child] = createPipe();
 
-	pid = fork();
-	if (pid < 0) {
+	pid_ = fork();
+	if (pid_ < 0) {
 		throw std::runtime_error("Error, unable to fork: "s + std::strerror(errno));
 	}
-	else if (pid == 0) { // child
+	else if (pid_ == 0) { // child
 		try {
 			close();
 			parent.close();
@@ -29,20 +29,20 @@ Process::Process(const std::string& path) :
 		}
 	}
 	else { // parent
-		descriptor = std::move(parent);
+		descriptor_ = std::move(parent);
 	}
 }
 
 Process::Process(Process&& other):
-	descriptor(std::move(other.descriptor)),
-	pid(other.pid) {
-	other.pid = -1;
+	descriptor_(std::move(other.descriptor_)),
+	pid_(other.pid_) {
+	other.pid_ = -1;
 }
 
 Process& Process::operator=(Process&& other) {
-	descriptor = std::move(other.descriptor);
-	pid = other.pid;
-	other.pid = -1;
+	descriptor_ = std::move(other.descriptor_);
+	pid_ = other.pid_;
+	other.pid_ = -1;
 	return *this;
 }
 
@@ -52,7 +52,7 @@ Process::~Process() {
 }
 
 size_t Process::write(const void* data, size_t len) {
-	ssize_t written = descriptor.write(data, len);
+	ssize_t written = descriptor_.write(data, len);
 	if (written == -1) {
 		throw std::runtime_error("Error, unable to write: "s + std::strerror(errno));
 	}
@@ -68,7 +68,7 @@ void Process::writeExact(const void* data, size_t len){
 }
 
 size_t Process::read(void* data, size_t len) {
-	ssize_t recieved = descriptor.read(data, len);
+	ssize_t recieved = descriptor_.read(data, len);
 	if (recieved == -1) {
 		throw std::runtime_error("Error, unable to read: "s + std::strerror(errno));
 	}
@@ -84,32 +84,32 @@ void Process::readExact(void* data, size_t len) {
 }
 
 bool Process::isReadable() const {
-	return descriptor.isInAvailable();
+	return descriptor_.isInAvailable();
 }
 
 int Process::join() {
 	int returnStatus = EXIT_FAILURE;
-	if (pid != -1) {
-    	pid_t res = waitpid(pid, &returnStatus, 0);
+	if (pid_ != -1) {
+    	pid_t res = waitpid(pid_, &returnStatus, 0);
 		if (res != -1) {
-			pid = -1;
+			pid_ = -1;
 		}
 	}
 	return returnStatus;
 }
 
 void Process::kill() {
-	if (pid != -1) {
-		::kill(pid, SIGKILL); // maybe check return status?
+	if (pid_ != -1) {
+		::kill(pid_, SIGKILL); // maybe check return status?
 	}
 }
 
 void Process::closeStdin() {
-	descriptor.closeOut();
+	descriptor_.closeOut();
 }
 
 void Process::close() {
-	descriptor.close();
+	descriptor_.close();
 }
 
 } // namespace process
