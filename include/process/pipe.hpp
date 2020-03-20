@@ -23,14 +23,14 @@ public:
 // Combines two unidirectional descriptors into one bidirectional
 class DuplexDescriptor : public Descriptor {
 public:
-	explicit DuplexDescriptor();
+	DuplexDescriptor();
 	DuplexDescriptor(const DuplexDescriptor& other) = delete;
 	DuplexDescriptor& operator=(const DuplexDescriptor& other) = delete;
 	DuplexDescriptor(DuplexDescriptor&& other);
 	DuplexDescriptor& operator=(DuplexDescriptor&& other);
 	~DuplexDescriptor();
 
-	explicit DuplexDescriptor(int input, int output);
+	DuplexDescriptor(int input, int output);
 	// Close input descriptor
 	void closeIn();
 	// Close output descriptor
