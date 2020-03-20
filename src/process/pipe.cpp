@@ -3,6 +3,8 @@
 
 namespace process {
 
+using namespace std::string_literals; // 's' literal for exceptions
+
 DuplexDescriptor::DuplexDescriptor() :
 	in(-1),
 	out(-1) {

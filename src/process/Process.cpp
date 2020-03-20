@@ -3,6 +3,8 @@
 
 namespace process {
 
+using namespace std::string_literals; // 's' literal for exceptions
+
 Process::Process(const std::string& path) :
 	pid(-1) {
 

@@ -9,8 +9,6 @@
 
 namespace process {
 
-using namespace std::string_literals; // 's' literal for exceptions
-
 // Interface for descriptor access
 class Descriptor {
 public:

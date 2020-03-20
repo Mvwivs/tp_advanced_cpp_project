@@ -10,8 +10,6 @@
 
 namespace process {
 
-using namespace std::string_literals; // 's' literal for exceptions
-
 // Run executable in child process with stdin/stdout connected to parent process
 class Process {
 public:
