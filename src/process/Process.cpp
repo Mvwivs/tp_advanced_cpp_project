@@ -63,14 +63,18 @@ void Process::writeExact(const void* data, size_t len){
 	ssize_t written = 0;
 	const char* d = static_cast<const char*>(data);
 	while (len - written != 0) {
-		written += write(d + written, len - written);
+		ssize_t res = write(d + written, len - written);;
+		if (res == 0) {
+			throw std::runtime_error("Error, unable to writeExact, EOF: "s + std::strerror(errno));
+		}
+		written += res;
 	}
 }
 
 size_t Process::read(void* data, size_t len) {
 	ssize_t recieved = descriptor_.read(data, len);
 	if (recieved == -1) {
-		throw std::runtime_error("Error, unable to read: "s + std::strerror(errno));
+		throw std::runtime_error("Error, unable to read: EOF");
 	}
 	return recieved;
 }
@@ -79,7 +83,11 @@ void Process::readExact(void* data, size_t len) {
 	ssize_t recieved = 0;
 	char* d = static_cast<char*>(data);
 	while (len - recieved != 0) {
-		recieved += read(d + recieved, len - recieved); // maybe check for eof?
+		ssize_t res = read(d + recieved, len - recieved);
+		if (res == 0) {
+			throw std::runtime_error("Error, unable to readExact: EOF");
+		}
+		recieved += res;
 	}
 }
 
