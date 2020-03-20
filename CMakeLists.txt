@@ -8,6 +8,8 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
 
+set(CMAKE_CXX_STANDARD 17)
+
 include_directories(include)
 
 add_subdirectory(src)
