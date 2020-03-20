@@ -36,10 +36,6 @@ public:
 	void close();
 
 private:
-	// Close underlying descriptor
-	static void closeDescriptor(int& fd);
-
-private:
 	int in_;		// Input (read) descriptor
 	int out_;	// Output (write) descriptor
 

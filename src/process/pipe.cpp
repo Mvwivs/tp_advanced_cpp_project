@@ -5,6 +5,13 @@ namespace process {
 
 using namespace std::string_literals; // 's' literal for exceptions
 
+void closeDescriptor(int& fd) {
+	if (fd != -1) {
+		::close(fd);
+	}
+	fd = -1;
+}
+
 DuplexDescriptor::DuplexDescriptor() :
 	in_(-1),
 	out_(-1) {
@@ -70,26 +77,15 @@ void DuplexDescriptor::close() {
 	closeDescriptor(out_);
 }
 
-void DuplexDescriptor::closeDescriptor(int& fd) {
-	if (fd != -1) {
-		::close(fd);
-	}
-	fd = -1;
-}
-
 Pipe createPipe() {	// TODO: replace with factory
 	int readpipe[2] = {-1, -1};
 	int writepipe[2] = {-1, -1};
 	if (pipe(readpipe) < 0 || pipe(writepipe) < 0) { // create two pipes
 		for (int fd : readpipe) {
-			if (fd != -1) {
-				::close(fd);
-			}
+			closeDescriptor(fd);
 		}
 		for (int fd : writepipe) {
-			if (fd != -1) {
-				::close(fd);
-			}
+			closeDescriptor(fd);
 		}
 		throw std::runtime_error("Error, unable to create pipes: "s + std::strerror(errno));
 	}
