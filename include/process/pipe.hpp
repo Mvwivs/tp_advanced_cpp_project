@@ -9,19 +9,8 @@
 
 namespace process {
 
-// Interface for descriptor access
-class Descriptor {
-public:
-	// Write data to descriptor
-	virtual size_t write(const void* data, size_t len) = 0;
-	// Read data from descriptor
-	virtual size_t read(void* data, size_t len) = 0;
-	// Close descriptor
-	virtual void close() = 0;
-};
-
 // Combines two unidirectional descriptors into one bidirectional
-class DuplexDescriptor : public Descriptor {
+class DuplexDescriptor {
 public:
 	DuplexDescriptor();
 	DuplexDescriptor(const DuplexDescriptor& other) = delete;
@@ -38,13 +27,13 @@ public:
 	// Check if input descriptor is available for reading
 	bool isInAvailable() const;
 	// Write data to output descriptor
-	size_t write(const void* data, size_t len) override;
+	size_t write(const void* data, size_t len);
 	// Read data from input desctiprot
-	size_t read(void* data, size_t len) override;
+	size_t read(void* data, size_t len);
 	// Redirect descriptors to stdin/stdout
 	void redirectToStd();
 	// Close descriptors
-	void close() override;
+	void close();
 
 private:
 	// Close underlying descriptor
