@@ -41,10 +41,10 @@ private:
 
 };
 
-// Pipe, consisting of two connected biderectional descriptors
-using Pipe = std::pair<DuplexDescriptor, DuplexDescriptor>;
+// biderectional pipe, consisting of two connected biderectional descriptors
+using DuplexPipe = std::pair<DuplexDescriptor, DuplexDescriptor>;
 
 // Create two connected bidirectional read/write descriptors
-Pipe createPipe(); // TODO: replace with factory
+DuplexPipe createDuplexPipe(); // TODO: replace with factory
 
 } // namespace process

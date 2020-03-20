@@ -8,7 +8,7 @@ using namespace std::string_literals; // 's' literal for exceptions
 Process::Process(const std::string& path) :
 	pid_(-1) {
 
-	auto [parent, child] = createPipe();
+	auto [parent, child] = createDuplexPipe();
 
 	pid_ = fork();
 	if (pid_ < 0) {

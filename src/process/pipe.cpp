@@ -77,7 +77,7 @@ void DuplexDescriptor::close() {
 	closeDescriptor(out_);
 }
 
-Pipe createPipe() {	// TODO: replace with factory
+DuplexPipe createDuplexPipe() {	// TODO: replace with factory
 	int readpipe[2] = {-1, -1};
 	int writepipe[2] = {-1, -1};
 	if (pipe(readpipe) < 0 || pipe(writepipe) < 0) { // create two pipes
