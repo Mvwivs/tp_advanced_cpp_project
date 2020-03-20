@@ -17,11 +17,10 @@ int main() {
 	p.closeStdin();
 	std::cout << "closed socket" << std::endl;
 
-	char buff[data_len] = {};
-	p.readExact(buff, data.size());
+	std::vector<char> recieved(data_len, 0);
+	p.readExact(recieved.data(), recieved.size());
 	std::cout << "finished reading" << std::endl;
 
-	std::vector<char> recieved(buff, buff + data.size());
 	if (recieved == data) {
 		std::cout << "Success" << std::endl;
 	}
