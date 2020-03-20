@@ -90,7 +90,7 @@ bool Process::isReadable() const {
 int Process::join() {
 	int returnStatus = EXIT_FAILURE;
 	if (pid_ != -1) {
-    	pid_t res = waitpid(pid_, &returnStatus, 0);
+		pid_t res = waitpid(pid_, &returnStatus, 0);
 		if (res != -1) {
 			pid_ = -1;
 		}

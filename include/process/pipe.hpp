@@ -41,6 +41,9 @@ private:
 
 };
 
+// try close underlying descriptor and set it to -1 
+void closeDescriptor(int& fd);
+
 // biderectional pipe, consisting of two connected biderectional descriptors
 using DuplexPipe = std::pair<DuplexDescriptor, DuplexDescriptor>;
 

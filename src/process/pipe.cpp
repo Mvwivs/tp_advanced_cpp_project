@@ -77,21 +77,23 @@ void DuplexDescriptor::close() {
 	closeDescriptor(out_);
 }
 
-DuplexPipe createDuplexPipe() {	// TODO: replace with factory
-	int readpipe[2] = {-1, -1};
-	int writepipe[2] = {-1, -1};
-	if (pipe(readpipe) < 0 || pipe(writepipe) < 0) { // create two pipes
-		for (int fd : readpipe) {
-			closeDescriptor(fd);
-		}
-		for (int fd : writepipe) {
-			closeDescriptor(fd);
-		}
+DuplexPipe createDuplexPipe() {
+	/*
+		|    (1)     |      ---- [[0] first_pipe  [1]] --->     |    (2)     |
+		| descriptor |      <--- [[1] second_pipe [0]] ----     | descriptor |
+	*/
+	int first_pipe[2] = {-1, -1};
+	int second_pipe[2] = {-1, -1};
+	if (pipe(first_pipe) < 0 || pipe(second_pipe) < 0) { // create two pipes
+		closeDescriptor(first_pipe[0]);
+		closeDescriptor(first_pipe[1]);
+		closeDescriptor(second_pipe[0]);
+		closeDescriptor(second_pipe[1]);
 		throw std::runtime_error("Error, unable to create pipes: "s + std::strerror(errno));
 	}
 	return {
-		DuplexDescriptor{ readpipe[0], writepipe[1] },
-		DuplexDescriptor{ writepipe[0], readpipe[1] }
+		DuplexDescriptor{ first_pipe[0], second_pipe[1] },	// (1) descriptor
+		DuplexDescriptor{ second_pipe[0], first_pipe[1] }	// (2) descriptor
 	};
 }
 
