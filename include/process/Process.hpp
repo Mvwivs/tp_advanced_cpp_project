@@ -15,11 +15,11 @@ class Process {
 public:
 	// Run with specified path to executable
 	explicit Process(const std::string& path);
+	Process(Process&& other);
+	Process& operator=(Process&& other);
 	Process() = delete;
-	Process(Process&& other) = delete;
-	Process(const Process& other) = delete;
-	Process& operator=(Process&& other) = delete;
 	Process& operator=(const Process& other) = delete;
+	Process(const Process& other) = delete;
 	~Process();
 
 	// Write data to child process, return written bytes count

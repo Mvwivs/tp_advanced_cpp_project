@@ -33,6 +33,19 @@ Process::Process(const std::string& path) :
 	}
 }
 
+Process::Process(Process&& other):
+	descriptor(std::move(other.descriptor)),
+	pid(other.pid) {
+	other.pid = -1;
+}
+
+Process& Process::operator=(Process&& other) {
+	descriptor = std::move(other.descriptor);
+	pid = other.pid;
+	other.pid = -1;
+	return *this;
+}
+
 Process::~Process() {
 	close();
 	kill(); // maybe wait?
