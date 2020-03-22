@@ -1,4 +1,3 @@
 
-project(process_example)
-
 add_subdirectory(process)
+add_subdirectory(logger)
