@@ -6,6 +6,5 @@ add_executable(process_example
 )
 
 target_link_libraries(process_example
-	PRIVATE
-		process
+	process
 )
