@@ -25,7 +25,7 @@ Process::Process(const std::string& path) :
 		}
 		catch (const std::exception& e) {
 			child.close();
-			exit(EXIT_FAILURE); // maybe print exception?
+			_Exit(EXIT_FAILURE); // maybe print exception?
 		}
 	}
 	else { // parent
