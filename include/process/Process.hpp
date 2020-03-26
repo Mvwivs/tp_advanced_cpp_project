@@ -16,8 +16,7 @@ namespace process {
 class Process {
 public:
 	// Run with specified path to executable
-	template <typename... Args>
-	Process(const std::string& path, Args... args);
+	Process(const std::string& path, const std::vector<std::string>& args);
 	Process(Process&& other);
 	Process& operator=(Process&& other);
 	Process() = delete;
@@ -56,35 +55,5 @@ private:
 	DuplexDescriptor descriptor_;	// Desciptor used to commuticate with child
 	pid_t pid_;						// pid of child process
 };
-
-template <typename... Args>
-Process::Process(const std::string& path, Args... args) :
-	pid_(-1) {
-
-	auto [parent, child] = createDuplexPipe();
-
-	pid_ = fork();
-	if (pid_ < 0) {
-		throw std::runtime_error(std::string("Error, unable to fork: ") + std::strerror(errno));
-	}
-	else if (pid_ == 0) { // child
-		try {
-			close();
-			parent.close();
-			child.redirectToStd();
-			exec(path, args...);
-			// if exec failed
-			throw std::runtime_error(std::string("Error, exec wasn't called: ") + std::strerror(errno));
-		}
-		catch (const std::exception& e) {
-			child.close();
-			_Exit(EXIT_FAILURE); // maybe print exception?
-		}
-	}
-	else { // parent
-		descriptor_ = std::move(parent);
-	}
-}
-
 
 } // namespace process

@@ -5,6 +5,34 @@ namespace process {
 
 using namespace std::string_literals; // 's' literal for exceptions
 
+Process::Process(const std::string& path, const std::vector<std::string>& args) :
+	pid_(-1) {
+
+	auto [parent, child] = createDuplexPipe();
+
+	pid_ = fork();
+	if (pid_ < 0) {
+		throw std::runtime_error(std::string("Error, unable to fork: ") + std::strerror(errno));
+	}
+	else if (pid_ == 0) { // child
+		try {
+			close();
+			parent.close();
+			child.redirectToStd();
+			exec(path, args);
+			// if exec failed
+			throw std::runtime_error(std::string("Error, exec wasn't called: ") + std::strerror(errno));
+		}
+		catch (const std::exception& e) {
+			child.close();
+			_Exit(EXIT_FAILURE); // maybe print exception?
+		}
+	}
+	else { // parent
+		descriptor_ = std::move(parent);
+	}
+}
+
 Process::Process(Process&& other):
 	descriptor_(std::move(other.descriptor_)),
 	pid_(other.pid_) {
