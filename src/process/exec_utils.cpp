@@ -1,6 +1,8 @@
 
 #include "process/exec_utils.hpp"
 
+#include <unistd.h>
+
 namespace process {
 
 int exec(const std::string& path, std::vector<std::string> args) {

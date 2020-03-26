@@ -1,11 +1,8 @@
 
 #pragma once
 
-#include <stdexcept>
-#include <cstring>
-
-#include <unistd.h>
-#include <fcntl.h>
+#include <cstdint>
+#include <utility>
 
 namespace process {
 
@@ -27,9 +24,9 @@ public:
 	// Check if input descriptor is available for reading
 	bool isInAvailable() const;
 	// Write data to output descriptor
-	size_t write(const void* data, size_t len);
+	std::size_t write(const void* data, std::size_t len);
 	// Read data from input desctiprot
-	size_t read(void* data, size_t len);
+	std::size_t read(void* data, std::size_t len);
 	// Redirect descriptors to stdin/stdout
 	void redirectToStd();
 	// Close descriptors

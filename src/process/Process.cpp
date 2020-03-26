@@ -1,6 +1,14 @@
 
 #include "process/Process.hpp"
 
+#include <stdexcept>
+#include <cstring>
+
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include "process/exec_utils.hpp"
+
 namespace process {
 
 using namespace std::string_literals; // 's' literal for exceptions
