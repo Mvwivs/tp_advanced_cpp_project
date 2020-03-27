@@ -37,6 +37,7 @@ DuplexDescriptor::DuplexDescriptor(DuplexDescriptor&& other):
 }
 
 DuplexDescriptor& DuplexDescriptor::operator=(DuplexDescriptor&& other) {
+	close();
 	in_ = other.in_;
 	out_ = other.out_;
 	other.in_ = -1;
