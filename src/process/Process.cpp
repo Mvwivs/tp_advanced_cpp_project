@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <cstring>
+#include <iostream>
 
 #include <sys/wait.h>
 #include <unistd.h>
@@ -33,7 +34,9 @@ Process::Process(const std::string& path, const std::vector<std::string>& args) 
 		}
 		catch (const std::exception& e) {
 			child.close();
-			_Exit(EXIT_FAILURE); // maybe print exception?
+			std::cerr << e.what() << std::endl;
+			std::cerr.flush();
+			_exit(EXIT_FAILURE); // maybe print exception?
 		}
 	}
 	else { // parent
