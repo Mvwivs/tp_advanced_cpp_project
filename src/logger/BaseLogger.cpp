@@ -1,6 +1,4 @@
 
-#pragma once
-
 #include "logger/BaseLogger.hpp"
 
 namespace logger {

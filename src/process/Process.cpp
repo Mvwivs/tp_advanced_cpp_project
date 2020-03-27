@@ -1,31 +1,42 @@
 
 #include "process/Process.hpp"
 
+#include <stdexcept>
+#include <cstring>
+#include <iostream>
+
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include "process/exec_utils.hpp"
+
 namespace process {
 
 using namespace std::string_literals; // 's' literal for exceptions
 
-Process::Process(const std::string& path) :
+Process::Process(const std::string& path, const std::vector<std::string>& args) :
 	pid_(-1) {
 
 	auto [parent, child] = createDuplexPipe();
 
 	pid_ = fork();
 	if (pid_ < 0) {
-		throw std::runtime_error("Error, unable to fork: "s + std::strerror(errno));
+		throw std::runtime_error(std::string("Error, unable to fork: ") + std::strerror(errno));
 	}
 	else if (pid_ == 0) { // child
 		try {
 			close();
 			parent.close();
 			child.redirectToStd();
-			execl(path.c_str(), path.c_str(), (char*)NULL);
-			// if execl failed
-			throw std::runtime_error("Error, exec wasn't called: "s + std::strerror(errno));
+			exec(path, args);
+			// if exec failed
+			throw std::runtime_error(std::string("Error, exec wasn't called: ") + std::strerror(errno));
 		}
 		catch (const std::exception& e) {
 			child.close();
-			exit(EXIT_FAILURE); // maybe print exception?
+			std::cerr << e.what() << std::endl;
+			std::cerr.flush();
+			_exit(EXIT_FAILURE); // maybe print exception?
 		}
 	}
 	else { // parent

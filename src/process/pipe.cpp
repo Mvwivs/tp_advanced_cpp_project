@@ -1,6 +1,13 @@
 
 #include "process/pipe.hpp"
 
+#include <stdexcept>
+#include <cstring>
+#include <string>
+
+#include <unistd.h>
+#include <fcntl.h>
+
 namespace process {
 
 using namespace std::string_literals; // 's' literal for exceptions
@@ -30,6 +37,7 @@ DuplexDescriptor::DuplexDescriptor(DuplexDescriptor&& other):
 }
 
 DuplexDescriptor& DuplexDescriptor::operator=(DuplexDescriptor&& other) {
+	close();
 	in_ = other.in_;
 	out_ = other.out_;
 	other.in_ = -1;
@@ -53,11 +61,11 @@ bool DuplexDescriptor::isInAvailable() const {
 	return fcntl(in_, F_GETFD) != -1 || errno != EBADF;
 }
 
-size_t DuplexDescriptor::write(const void* data, size_t len) {
+std::size_t DuplexDescriptor::write(const void* data, std::size_t len) {
 	return ::write(out_, data, len);
 }
 
-size_t DuplexDescriptor::read(void* data, size_t len) {
+std::size_t DuplexDescriptor::read(void* data, std::size_t len) {
 	return ::read(in_, data, len);
 }
 

@@ -1,10 +1,11 @@
 
 #pragma once
 
-#include <stdexcept>
 #include <string>
+#include <vector>
+#include <cstdint>
 
-#include <sys/wait.h>
+#include <sys/types.h>
 
 #include "pipe.hpp"
 
@@ -14,7 +15,7 @@ namespace process {
 class Process {
 public:
 	// Run with specified path to executable
-	explicit Process(const std::string& path);
+	explicit Process(const std::string& path, const std::vector<std::string>& args = {});
 	Process(Process&& other);
 	Process& operator=(Process&& other);
 	Process() = delete;
@@ -23,16 +24,16 @@ public:
 	~Process();
 
 	// Write data to child process, return written bytes count
-	size_t write(const void* data, size_t len);
+	std::size_t write(const void* data, std::size_t len);
 
 	// Write exactly len bytes of data to child process
-	void writeExact(const void* data, size_t len);
+	void writeExact(const void* data, std::size_t len);
 
 	// Read data from child process, return read bytes count
-	size_t read(void* data, size_t len);
+	std::size_t read(void* data, std::size_t len);
 
 	// Read exactly len bytes of data from child process
-	void readExact(void* data, size_t len);
+	void readExact(void* data, std::size_t len);
 
 	// Check if read operation is available
 	bool isReadable() const;

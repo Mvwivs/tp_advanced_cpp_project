@@ -1,14 +1,19 @@
 
-#include <unistd.h>
-#include <cstdio>
 #include <iostream>
 
-int main() {
-	char buffer[256];
-	while (!feof(stdin)) {
-		size_t bytes = fread(buffer, 1, sizeof(buffer), stdin);
-		size_t b = fwrite(buffer, 1, bytes, stdout);
-		fflush(stdout);
+int main(int argc, char *argv[]) {
+
+	std::cerr << "Arguments: ";
+	for (int i = 0; i < argc; ++i) {
+		std::cerr << argv[i] << ", "; 
 	}
+	std::cerr << std::endl;
+
+	while (std::cin) {
+		char byte;
+		std::cin >> byte;
+		std::cout << byte;
+	}
+
 	return 0;
 }
