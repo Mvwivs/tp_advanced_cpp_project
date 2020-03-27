@@ -15,7 +15,7 @@ namespace process {
 class Process {
 public:
 	// Run with specified path to executable
-	Process(const std::string& path, const std::vector<std::string>& args);
+	explicit Process(const std::string& path, const std::vector<std::string>& args = {});
 	Process(Process&& other);
 	Process& operator=(Process&& other);
 	Process() = delete;
