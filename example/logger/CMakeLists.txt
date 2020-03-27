@@ -6,6 +6,5 @@ add_executable(logger_example
 )
 
 target_link_libraries(logger_example
-	PRIVATE
-		stdc++fs
+		logger
 )

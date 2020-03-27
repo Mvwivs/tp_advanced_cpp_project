@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <memory>
 #include <filesystem>
 
@@ -14,55 +16,32 @@ public:
 	Logger(const Logger& othrer) = delete;
 	Logger& operator=(const Logger& other) = delete;
 
-	static Logger& get_instance() {
-		static Logger instance;
-		return instance;
-	}
+	static Logger& get_instance();
 
-	BaseLogger& get_global_logger() {
-		return *global_logger_.get();
-	}
+	BaseLogger& get_global_logger();
 
-	void set_global_logger(std::unique_ptr<BaseLogger> new_logger) {
-		global_logger_ = std::move(new_logger);
-	}
+	void set_global_logger(std::unique_ptr<BaseLogger> new_logger);
 
 private:
-	Logger():
-		global_logger_(std::make_unique<StdoutLogger>()) {
-	};
+	Logger();
 
 private:
 	std::unique_ptr<BaseLogger> global_logger_;
 };
 
-std::unique_ptr<BaseLogger> create_stdout_logger() {
-	return std::make_unique<StdoutLogger>();
-}
+std::unique_ptr<BaseLogger> create_stdout_logger();
 
-std::unique_ptr<BaseLogger> create_stderr_logger() {
-	return std::make_unique<StderrLogger>();
-}
+std::unique_ptr<BaseLogger> create_stderr_logger();
 
-std::unique_ptr<BaseLogger> create_file_logger(const std::filesystem::path& filename) {
-	return std::make_unique<FileLogger>(filename);
-}
+std::unique_ptr<BaseLogger> create_file_logger(const std::filesystem::path& filename);
 
-void debug(const std::string& message) {
-	Logger::get_instance().get_global_logger().debug(message);
-}
+void debug(const std::string& message);
 
-void warn(const std::string& message) {
-	Logger::get_instance().get_global_logger().warn(message);
-}
+void warn(const std::string& message);
 
-void info(const std::string& message) {
-	Logger::get_instance().get_global_logger().info(message);
-}
+void info(const std::string& message);
 
-void error(const std::string& message) {
-	Logger::get_instance().get_global_logger().error(message);
-}
+void error(const std::string& message);
 
 } // namespace logger
 

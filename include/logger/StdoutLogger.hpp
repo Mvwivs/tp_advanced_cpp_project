@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <iostream>
 
 #include "BaseLogger.hpp"
@@ -10,15 +12,10 @@ public:
 	StdoutLogger() = default;
 	virtual ~StdoutLogger() = default;
 
-	virtual void flush() override {
-		std::cout.flush();
-	}
+	virtual void flush() override;
 
 protected:
-	virtual void log_full_message(const std::string& full_message) override {
-		std::cout << full_message << std::endl;
-	}
+	virtual void log_full_message(const std::string& full_message) override;
 };
 
 }
-

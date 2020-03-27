@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <fstream>
 #include <filesystem>
 
@@ -8,19 +10,13 @@ namespace logger {
 
 class FileLogger : public BaseLogger {
 public:
-	FileLogger(const std::filesystem::path& filename):
-		log_file(filename) {
-	}
+	FileLogger(const std::filesystem::path& filename);
 	virtual ~FileLogger() = default;
 
-	virtual void flush() override {
-		log_file.flush();
-	}
+	virtual void flush() override;
 
 protected:
-	virtual void log_full_message(const std::string& full_message) override {
-		log_file << full_message << std::endl;
-	}
+	virtual void log_full_message(const std::string& full_message) override;
 
 private:
 	std::ofstream log_file;
