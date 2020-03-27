@@ -1,16 +1,17 @@
 
 #include <fstream>
+#include <filesystem>
 
 #include "BaseLogger.hpp"
 
 namespace logger {
 
-class StderrLogger : public BaseLogger {
+class FileLogger : public BaseLogger {
 public:
-	StderrLogger(const std::string& filename):
+	FileLogger(const std::filesystem::path& filename):
 		log_file(filename) {
 	}
-	virtual ~StderrLogger() = default;
+	virtual ~FileLogger() = default;
 
 	virtual void flush() override {
 		log_file.flush();

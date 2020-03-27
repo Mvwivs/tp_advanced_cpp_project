@@ -1,8 +1,11 @@
 
 #include <memory>
+#include <filesystem>
 
 #include "BaseLogger.hpp"
 #include "StdoutLogger.hpp"
+#include "StderrLogger.hpp"
+#include "FileLogger.hpp"
 
 namespace logger {
 
@@ -10,32 +13,55 @@ class Logger {
 public:
 	Logger(const Logger& othrer) = delete;
 	Logger& operator=(const Logger& other) = delete;
+
 	static Logger& get_instance() {
 		static Logger instance;
 		return instance;
 	}
 
-	std::shared_ptr<BaseLogger> get_global_logger() {
-		return global_logger_;
+	BaseLogger& get_global_logger() {
+		return *global_logger_.get();
 	}
 
-	void set_global_logger(std::shared_ptr<BaseLogger> new_logger) {
+	void set_global_logger(std::unique_ptr<BaseLogger> new_logger) {
 		global_logger_ = std::move(new_logger);
 	}
 
 private:
-	Logger() = default;
-	std::shared_ptr<BaseLogger> global_logger_;
+	Logger():
+		global_logger_(std::make_unique<StdoutLogger>()) {
+	};
+
+private:
+	std::unique_ptr<BaseLogger> global_logger_;
 };
 
-void create_stdout_logger() {
-	Logger& log = Logger::get_instance();
-	log.set_global_logger(std::make_unique<StdoutLogger>());
+std::unique_ptr<BaseLogger> create_stdout_logger() {
+	return std::make_unique<StdoutLogger>();
+}
+
+std::unique_ptr<BaseLogger> create_stderr_logger() {
+	return std::make_unique<StderrLogger>();
+}
+
+std::unique_ptr<BaseLogger> create_file_logger(const std::filesystem::path& filename) {
+	return std::make_unique<FileLogger>(filename);
 }
 
 void debug(const std::string& message) {
-	auto log = Logger::get_instance().get_global_logger();
-	log->debug(message);
+	Logger::get_instance().get_global_logger().debug(message);
+}
+
+void warn(const std::string& message) {
+	Logger::get_instance().get_global_logger().warn(message);
+}
+
+void info(const std::string& message) {
+	Logger::get_instance().get_global_logger().info(message);
+}
+
+void error(const std::string& message) {
+	Logger::get_instance().get_global_logger().error(message);
 }
 
 } // namespace logger
