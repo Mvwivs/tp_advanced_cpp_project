@@ -1,6 +1,11 @@
 
 #include "logger/BaseLogger.hpp"
 
+#include <stdexcept>
+#include <chrono>
+#include <sstream>
+#include <iomanip>
+
 namespace logger {
 
 std::string get_loglevel_as_string(Level level) {

@@ -2,10 +2,6 @@
 #pragma once
 
 #include <string>
-#include <stdexcept>
-#include <chrono>
-#include <sstream>
-#include <iomanip>
 
 namespace logger {
 
