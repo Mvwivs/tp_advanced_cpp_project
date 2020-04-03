@@ -43,7 +43,7 @@ void Connection::connect(Address address) {
 	destintation_ = address;
 }
 
-std::size_t Connection::write(const void* data, std::size_t len) {
+std::size_t Connection::write(const void* data, std::size_t len) const {
 	ssize_t written = ::write(fd_, data, len);
 	if (written == -1) {
 		throw ConnectionException("Unable to write: "s + std::strerror(errno));
@@ -51,7 +51,7 @@ std::size_t Connection::write(const void* data, std::size_t len) {
 	return written;
 }
 
-std::size_t Connection::read(void* data, std::size_t len) {
+std::size_t Connection::read(void* data, std::size_t len) const {
 	ssize_t recieved = ::read(fd_, data, len);
 	if (recieved == -1) {
 		throw ConnectionException("Unable to read: "s + std::strerror(errno));
@@ -59,7 +59,7 @@ std::size_t Connection::read(void* data, std::size_t len) {
 	return recieved;
 }
 
-void Connection::writeExact(const void* data, std::size_t len) {
+void Connection::writeExact(const void* data, std::size_t len) const {
 	std::size_t written = 0;
 	const char* d = static_cast<const char*>(data);
 	while (len - written != 0) {
@@ -71,7 +71,7 @@ void Connection::writeExact(const void* data, std::size_t len) {
 	}
 }
 
-void Connection::readExact(void* data, std::size_t len) {
+void Connection::readExact(void* data, std::size_t len) const {
 	std::size_t recieved = 0;
 	char* d = static_cast<char*>(data);
 	while (len - recieved != 0) {
@@ -118,7 +118,7 @@ bool Connection::is_open() const {
 	return fd_ != -1;
 }
 
-void Connection::set_timeout(int timeout_s) {
+void Connection::set_timeout(int timeout_s) const {
 	timeval timeout{};
 	timeout.tv_sec = timeout_s;
 	int res = setsockopt(fd_, SOL_SOCKET, SO_SNDTIMEO | SO_RCVTIMEO, &timeout, sizeof(timeout));

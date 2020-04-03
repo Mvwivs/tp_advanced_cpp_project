@@ -24,7 +24,7 @@ public:
 
 	void close();
 
-	Connection accept();
+	Connection accept() const;
 
 	bool is_open() const;
 

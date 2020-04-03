@@ -16,13 +16,13 @@ public:
 
 	void connect(Address address);
 
-	std::size_t write(const void* data, std::size_t len);
+	std::size_t write(const void* data, std::size_t len) const;
 
-	std::size_t read(void* data, std::size_t len);
+	std::size_t read(void* data, std::size_t len) const;
 
-	void writeExact(const void* data, std::size_t len);
+	void writeExact(const void* data, std::size_t len) const;
 
-	void readExact(void* data, std::size_t len);
+	void readExact(void* data, std::size_t len) const;
 
 	Connection() = delete;
 
@@ -39,7 +39,7 @@ public:
 
 	bool is_open() const;
 
-	void set_timeout(int timeout_s);
+	void set_timeout(int timeout_s) const;
 
 	const Address& source() const;
 

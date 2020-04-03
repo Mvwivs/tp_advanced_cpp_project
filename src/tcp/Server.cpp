@@ -77,7 +77,7 @@ void Server::close() {
 	}
 }
 
-Connection Server::accept() {
+Connection Server::accept() const {
 	sockaddr_in client_addr;
 	socklen_t addr_size = sizeof(client_addr);
 	int socket = ::accept(fd_, reinterpret_cast<sockaddr*>(&client_addr), &addr_size);
@@ -94,7 +94,6 @@ bool Server::is_open() const {
 void Server::set_max_connect(int max_connections) {
 	int res = listen(fd_, max_connections);
 	if (res == -1) {
-		close();
 		throw ConnectionException("Unable to mark socket as listening: "s + std::strerror(errno));
 	}
 }
