@@ -25,7 +25,6 @@ Process::Process(const std::string& path, const std::vector<std::string>& args) 
 	}
 	else if (pid_ == 0) { // child
 		try {
-			close();
 			parent.close();
 			child.redirectToStd();
 			exec(path, args);
@@ -51,6 +50,7 @@ Process::Process(Process&& other):
 }
 
 Process& Process::operator=(Process&& other) {
+	close();
 	descriptor_ = std::move(other.descriptor_);
 	pid_ = other.pid_;
 	other.pid_ = -1;
@@ -59,7 +59,7 @@ Process& Process::operator=(Process&& other) {
 
 Process::~Process() {
 	close();
-	kill(); // maybe wait?
+	join();
 }
 
 size_t Process::write(const void* data, size_t len) {
@@ -71,10 +71,10 @@ size_t Process::write(const void* data, size_t len) {
 }
 
 void Process::writeExact(const void* data, size_t len){
-	ssize_t written = 0;
+	size_t written = 0;
 	const char* d = static_cast<const char*>(data);
 	while (len - written != 0) {
-		ssize_t res = write(d + written, len - written);;
+		size_t res = write(d + written, len - written);;
 		if (res == 0) {
 			throw std::runtime_error("Error, unable to writeExact, EOF: "s + std::strerror(errno));
 		}
@@ -91,10 +91,10 @@ size_t Process::read(void* data, size_t len) {
 }
 
 void Process::readExact(void* data, size_t len) {
-	ssize_t recieved = 0;
+	size_t recieved = 0;
 	char* d = static_cast<char*>(data);
 	while (len - recieved != 0) {
-		ssize_t res = read(d + recieved, len - recieved);
+		size_t res = read(d + recieved, len - recieved);
 		if (res == 0) {
 			throw std::runtime_error("Error, unable to readExact: EOF");
 		}
