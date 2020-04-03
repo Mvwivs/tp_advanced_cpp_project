@@ -7,21 +7,27 @@
 
 namespace tcp {
 
-class Server;
+class Server; // forward declaration
 
+// Represets tcp connection between two network nodes
 class Connection {
 public:
 	explicit Connection(Address address);
-	friend class Server;
+	friend class Server;	// allow private constructor use
 
+	// Connect to address (and close current connection)
 	void connect(Address address);
 
+	// Write len or less bytes of data
 	std::size_t write(const void* data, std::size_t len) const;
 
+	// Read len or less bytes of data
 	std::size_t read(void* data, std::size_t len) const;
 
+	// Try to write exactly len bytes of data
 	void writeExact(const void* data, std::size_t len) const;
 
+	// Try to read exactly len bytes of data
 	void readExact(void* data, std::size_t len) const;
 
 	Connection() = delete;
@@ -35,23 +41,27 @@ public:
 
 	~Connection();
 
+	// Close current connection
 	void close();
 
+	// Check if connetion is open
 	bool is_open() const;
 
 	void set_timeout(int timeout_s) const;
 
+	// Get address of source node
 	const Address& source() const;
 
+	// Get address of destination node
 	const Address& destintation() const;
 
 private:
-	explicit Connection(int& socket);
+	explicit Connection(int& socket);	// don't allow socket construction, except for friend classes
 
 private:
-	int fd_;
-	Address source_;
-	Address destintation_;
+	int fd_;				// Underlying socket
+	Address source_;		// Address of source node
+	Address destintation_;	// Address of destination node
 };
 
 }

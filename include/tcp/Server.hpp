@@ -6,10 +6,12 @@
 
 namespace tcp {
 
+// TCP server, allow to listens and accept connections
 class Server {
 public:
 	explicit Server(Address address, bool reuse_addr = false);
 
+	// Open server on specified address
 	void open(Address address, bool reuse_addr);
 
 	Server() = delete;
@@ -22,17 +24,21 @@ public:
 
 	~Server();
 
+	// Close server
 	void close();
 
+	// Wait for client, accept and return connection
 	Connection accept() const;
 
+	// Check if server is open
 	bool is_open() const;
 
+	// Set max connection count for listening
 	void set_max_connect(int max_connections);
 
 private:
-	int fd_;
-	static const int default_max_connect = 100;
+	int fd_;	// Underlying listening server socket
+	static const int default_max_connect = 100; // Defualt connection count for listening
 
 };
 
