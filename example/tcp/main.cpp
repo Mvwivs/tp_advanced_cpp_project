@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 
+#include "tcp/connection_utils.hpp"
+#include "tcp/Connection.hpp"
 #include "tcp/Server.hpp"
 
 void echo(tcp::Connection& connection) {
