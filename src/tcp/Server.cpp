@@ -11,13 +11,13 @@ namespace tcp {
 
 using namespace std::string_literals;
 
-Server::Server(Address address, bool reuse_addr) :
+Server::Server(const Address& address, bool reuse_addr) :
 	fd_(-1) {
 
 	open(address, reuse_addr);
 }
 
-void Server::open(Address address, bool reuse_addr) {
+void Server::open(const Address& address, bool reuse_addr) {
 	close();
 
 	fd_ = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);

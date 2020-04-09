@@ -9,10 +9,10 @@ namespace tcp {
 // TCP server, allow to listens and accept connections
 class Server {
 public:
-	explicit Server(Address address, bool reuse_addr = false);
+	explicit Server(const Address& address, bool reuse_addr = false);
 
 	// Open server on specified address
-	void open(Address address, bool reuse_addr);
+	void open(const Address& address, bool reuse_addr);
 
 	Server() = delete;
 	Server(const Server& other) = delete;

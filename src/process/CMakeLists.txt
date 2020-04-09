@@ -6,6 +6,6 @@ add_library(process
 )
 
 target_include_directories(process
-	PRIVATE 
+	PUBLIC 
 		${tp_advanced_cpp_SOURCE_DIR}/include
 )

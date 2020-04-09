@@ -8,7 +8,7 @@ add_library(logger
 )
 
 target_include_directories(logger
-	PRIVATE 
+	PUBLIC 
 		${tp_advanced_cpp_SOURCE_DIR}/include
 )
 

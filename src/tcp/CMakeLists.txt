@@ -6,6 +6,6 @@ add_library(tcp
 )
 
 target_include_directories(tcp
-	PRIVATE 
+	PUBLIC 
 		${tp_advanced_cpp_SOURCE_DIR}/include
 )

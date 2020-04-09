@@ -12,11 +12,11 @@ class Server; // forward declaration
 // Represets tcp connection between two network nodes
 class Connection {
 public:
-	explicit Connection(Address address);
+	explicit Connection(const Address& address);
 	friend class Server;	// allow private constructor use
 
 	// Connect to address (and close current connection)
-	void connect(Address address);
+	void connect(const Address& address);
 
 	// Write len or less bytes of data
 	std::size_t write(const void* data, std::size_t len) const;

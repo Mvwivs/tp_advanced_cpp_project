@@ -10,8 +10,6 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(tp_advanced_cpp_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(example)

@@ -14,12 +14,12 @@ namespace tcp {
 
 using namespace std::string_literals;
 
-Connection::Connection(Address address) :
+Connection::Connection(const Address& address) :
 	fd_(-1) {
 	connect(address);
 }
 
-void Connection::connect(Address address) {
+void Connection::connect(const Address& address) {
 	close(); // close previous connection
 
 	fd_ = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
