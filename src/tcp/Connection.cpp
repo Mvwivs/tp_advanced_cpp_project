@@ -4,6 +4,7 @@
 #include <string>
 #include <cstring>
 #include <stdexcept>
+#include <utility>
 
 #include <unistd.h>
 #include <netinet/in.h>
@@ -84,20 +85,16 @@ void Connection::readExact(void* data, std::size_t len) const {
 }
 
 Connection::Connection(Connection&& other) :
-	fd_(other.fd_),
-	source_(other.source_),
-	destintation_(other.destintation_) {
-	other.fd_ = -1;
-	other.close();
+	fd_(std::exchange(other.fd_, -1)),
+	source_(std::exchange(other.source_, {})),
+	destintation_(std::exchange(other.destintation_, {})) {
 }
 
 Connection& Connection::operator=(Connection&& other) {
 	close();
-	fd_ = other.fd_;
-	source_ = other.source_;
-	destintation_ = other.destintation_;
-	other.fd_ = -1;
-	other.close();
+	fd_ = std::exchange(other.fd_, -1);
+	source_ = std::exchange(other.source_, {});
+	destintation_ = std::exchange(other.destintation_, {});
 	return *this;
 }
 

@@ -11,7 +11,6 @@ namespace tcp {
 class ConnectionException : public std::runtime_error {
 public:
 	ConnectionException(const std::string& messsage);
-	~ConnectionException() = default;
 	ConnectionException() = delete;
 };
 

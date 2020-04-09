@@ -7,4 +7,5 @@ add_executable(tcp_example
 
 target_link_libraries(tcp_example
 	tcp
+	pthread
 )

@@ -2,6 +2,7 @@
 #include "tcp/Server.hpp"
 
 #include <cstring>
+#include <utility>
 
 #include <unistd.h>
 #include <sys/socket.h>
@@ -10,6 +11,7 @@
 namespace tcp {
 
 using namespace std::string_literals;
+constexpr int default_max_connect = 100; // Defualt connection count for listening
 
 Server::Server(const Address& address, bool reuse_addr) :
 	fd_(-1) {
@@ -54,15 +56,12 @@ void Server::open(const Address& address, bool reuse_addr) {
 }
 
 Server::Server(Server&& other) :
-	fd_(other.fd_) {
-	other.fd_ = -1;
+	fd_(std::exchange(other.fd_, -1)) {
 }
 
 Server& Server::operator=(Server&& other) {
 	close();
-	fd_ = other.fd_;
-	other.fd_ = -1;
-	other.close();
+	fd_ = std::exchange(other.fd_, -1);
 	return *this;
 }
 

@@ -9,14 +9,15 @@
 #include "tcp/Server.hpp"
 
 void echo(tcp::Connection& connection) {
-	char byte;
-	for (std::size_t recieved; recieved = connection.read(&byte, 1);) {
-		connection.writeExact(&byte, 1);
+	constexpr std::size_t buf_size = 400;
+	char buf[buf_size];
+	for (std::size_t recieved; recieved = connection.read(&buf, buf_size);) {
+		connection.writeExact(&buf, recieved);
 	}
 }
 
 bool check_read_write(tcp::Connection& connection) {
-	std::vector<char> data = {'H', 'e', 'l', 'l', 'o'};
+	std::vector<char> data(10000, 'a');
 	connection.writeExact(data.data(), data.size());
 
 	std::vector<char> recieved(data.size());
@@ -39,7 +40,7 @@ int main() {
 		bool result = check_read_write(to_client);
 
 		to_client.close();
-		to_client = std::move(server.accept());
+		to_client = server.accept();
 		std::cout << "Client reconnected on: "
 			<< to_client.destintation().ip_as_string() << ':' << to_client.destintation().port << std::endl;
 
@@ -49,9 +50,6 @@ int main() {
 	});
 
 	tcp::Connection client(server_address);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
-
-	std::cout << "Client connected to server on local port: " << client.source().port << std::endl;
 
 	echo(client);
 	client.connect(server_address);

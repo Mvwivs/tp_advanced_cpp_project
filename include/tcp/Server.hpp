@@ -38,7 +38,6 @@ public:
 
 private:
 	int fd_;	// Underlying listening server socket
-	static const int default_max_connect = 100; // Defualt connection count for listening
 
 };
 
