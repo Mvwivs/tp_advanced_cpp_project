@@ -16,7 +16,10 @@ public:
 	AsyncServer(const Address& address, Callback callback, const EventSet& events);
 
 	AsyncServer(const AsyncServer& other) = delete;
-	AsyncServer operator=(const AsyncServer& other) = delete;
+	AsyncServer& operator=(const AsyncServer& other) = delete;
+
+	AsyncServer(AsyncServer&& other);
+	AsyncServer& operator=(AsyncServer&& other);
 
 	~AsyncServer();
 	void close();

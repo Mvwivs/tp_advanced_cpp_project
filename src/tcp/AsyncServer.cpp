@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstring>
+#include <utility>
 
 #include <sys/epoll.h>
 #include <netinet/in.h>
@@ -33,6 +34,24 @@ AsyncServer::AsyncServer(const Address& address, Callback callback, const EventS
 		close();
 		throw ConnectionException("Unable to add to server epoll: "s + std::strerror(errno));
 	}
+}
+
+AsyncServer::AsyncServer(AsyncServer&& other):
+	epoll_fd_(std::exchange(other.epoll_fd_, -1)),
+	server_fd_(std::exchange(other.server_fd_, -1)),
+	callback_(std::move(other.callback_)),
+	connections_(std::move(other.connections_)),
+	events_(std::move(other.events_)) {
+}
+
+AsyncServer& AsyncServer::operator=(AsyncServer&& other) {
+	close();
+	epoll_fd_ = std::exchange(other.epoll_fd_, -1);
+	server_fd_ = std::exchange(other.server_fd_, -1);
+	callback_ = std::move(other.callback_);
+	connections_ = std::move(other.connections_);
+	events_ = std::move(other.events_);
+	return *this;
 }
 
 AsyncServer::~AsyncServer() {

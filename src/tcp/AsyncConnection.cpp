@@ -30,6 +30,16 @@ AsyncConnection::AsyncConnection(AsyncConnection&& other):
 	events_(std::move(other.events_)) {
 }
 
+AsyncConnection& AsyncConnection::operator=(AsyncConnection&& other) {
+	close();
+	fd_ = std::exchange(other.fd_, -1);
+	source_ = std::move(other.source_);
+	destination_ = std::move(other.destination_);
+	buffer_ = std::move(other.buffer_);
+	events_ = std::move(other.events_);
+	return *this;
+}
+
 AsyncConnection::~AsyncConnection() {
 	close();
 }

@@ -14,9 +14,9 @@ public:
 
 	AsyncConnection(const AsyncConnection& other) = delete;
 	AsyncConnection& operator=(const AsyncConnection& other) = delete;
-	AsyncConnection& operator=(AsyncConnection&& other) = delete;
 
 	AsyncConnection(AsyncConnection&& other);
+	AsyncConnection& operator=(AsyncConnection&& other);
 
 	~AsyncConnection();
 
