@@ -5,6 +5,8 @@
 #include <string>
 #include <cstdint>
 
+#include <unistd.h>
+
 namespace tcp {
 
 // Exception with network connections in runtime
@@ -34,5 +36,12 @@ Address get_source_address(int fd);
 
 // Extract destination ip and port from socket
 Address get_destination_address(int fd);
+
+inline void close_fd(int& fd) {
+	if (fd != -1) {
+		::close(fd);
+		fd = -1;
+	}
+}
 
 }
