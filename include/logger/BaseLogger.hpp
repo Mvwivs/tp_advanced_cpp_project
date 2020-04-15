@@ -2,6 +2,7 @@
 #pragma once
 
 #include <string>
+#include <stdexcept>
 
 namespace logger {
 
@@ -15,6 +16,15 @@ std::string get_loglevel_as_string(Level level);
 
 // create timestamp
 std::string get_timestamp();
+
+// Exception used by logger library when error occurs
+class LoggerException : public std::runtime_error {
+public:
+	LoggerException(const std::string& messsage):
+		std::runtime_error(messsage) {
+	}
+	LoggerException() = delete;
+};
 
 // Base logger class, allows to log at different levels
 class BaseLogger {

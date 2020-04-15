@@ -17,6 +17,9 @@ BaseLogger& Logger::get_global_logger() {
 }
 
 void Logger::set_global_logger(std::unique_ptr<BaseLogger> new_logger) {
+	if (!new_logger) {
+		throw LoggerException("Error: set_global_logger recieved nullptr");
+	}
 	global_logger_ = std::move(new_logger);
 }
 
