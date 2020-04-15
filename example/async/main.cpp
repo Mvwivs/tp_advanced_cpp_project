@@ -27,7 +27,7 @@ int main() {
 		std::size_t to_read = data.size();
 		std::size_t to_write = data.size();
 
-		// stateful lambda, every client has own read write counters
+		// need to use map to serve several clients
 		auto handler = [to_read, to_write, &data](tcp::AsyncConnection& connection) mutable {
 			if (connection.hasEvent(tcp::Event::ReadRdy)) {
 				std::size_t recieved = connection.readToBuffer(to_read);
