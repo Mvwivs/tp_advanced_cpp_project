@@ -13,7 +13,7 @@
 void echo(tcp::Connection& connection) {
 	constexpr std::size_t buf_size = 400;
 	char buf[buf_size];
-	for (std::size_t recieved; recieved = connection.read(&buf, buf_size);) {
+	for (std::size_t recieved; (recieved = connection.read(&buf, buf_size));) {
 		connection.writeExact(&buf, recieved);
 	}
 }
@@ -26,7 +26,9 @@ int main() {
 		std::vector<char> data(100000000, 'a');
 		std::size_t to_read = data.size();
 		std::size_t to_write = data.size();
-		auto handler = [&](tcp::AsyncConnection& connection) {
+
+		// stateful lambda, every client has own read write counters
+		auto handler = [to_read, to_write, &data](tcp::AsyncConnection& connection) mutable {
 			if (connection.hasEvent(tcp::Event::ReadRdy)) {
 				std::size_t recieved = connection.readToBuffer(to_read);
 				to_read -= recieved;

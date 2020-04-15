@@ -93,7 +93,7 @@ std::size_t AsyncConnection::read(void* data, std::size_t len) {
 
 std::size_t AsyncConnection::readToBuffer(std::size_t len) {
 	std::vector<char> readBuffer(len);
-	std::size_t recieved = read(readBuffer.data(), len);
+	ssize_t recieved = read(readBuffer.data(), len);
 	if (recieved == -1) {
 		if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
 			return 0;

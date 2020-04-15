@@ -76,7 +76,7 @@ void AsyncServer::run() {
 			throw ConnectionException("Epoll wait error: "s + std::strerror(errno));
 		}
 
-		for (std::size_t i = 0; i < recieved; ++i) {
+		for (int i = 0; i < recieved; ++i) {
 			int fd = events[i].data.fd;
 			uint32_t event = events[i].events;
 
@@ -157,7 +157,7 @@ void AsyncServer::addEpoll(int socket, const EventSet& events) {
 	if (res == -1) {
 		throw ConnectionException("Unable to add to epoll: "s + std::strerror(errno));
 	}
-	connections_.emplace(std::make_pair(socket, AsyncConnection{socket}));
+	connections_.emplace(socket, AsyncConnection{socket});
 }
 
 void AsyncServer::openServer(const Address& address) {
