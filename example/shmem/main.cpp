@@ -1,16 +1,10 @@
 
-#include <stdexcept>
-#include <map>
 #include <iostream>
-#include <mutex>
 
-#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <semaphore.h>
 #include <unistd.h>
 
-#include "shmem/ShmemAllocator.hpp"
 #include "shmem/ShmemMap.hpp"
 #include "shmem/Shmem.hpp"
 
@@ -22,14 +16,22 @@ int main() {
 
 	shmem::ShmemMap<int, char> map(mmap.get_allocator<std::pair<int, char>>());
 
-	int pid = fork();
+	int pid = ::fork();
 	if (pid != 0) { // child
-		map.insert({0, 'a'});
+		map.insert_or_assign({0, 'c'});
+		map.insert_or_assign({1, 'c'});
+
+		map.insert_or_assign({2, 'u'});
+		map.insert_or_assign({3, 'c'});
+		map.insert_or_assign({4, 'c'});
+		map.erase(3);
+		char c = map.at(2);
+		map.insert_or_assign({3, c});
 		exit(0);
 	}
-	else {
-		map.insert({0, 'b'});
-		map.insert({1, 'b'});
+	else { // parent
+		map.insert_or_assign({0, 'p'});
+		map.insert_or_assign({1, 'p'});
 	}
 	::waitpid(pid, nullptr, 0);
 

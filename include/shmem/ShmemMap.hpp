@@ -14,6 +14,7 @@ class ShmemMap {
 public:
 	using value_type = typename std::map<K, V>::value_type;
 	using key_type = typename std::map<K, V>::key_type;
+	using mapped_type = typename std::map<K, V>::mapped_type;
 
 	template <typename T>
 	using Alloc = shmem::ShmemAllocator<T>;
@@ -38,9 +39,9 @@ public:
 		allocator_.deallocate(map_, 1);
 	}
 
-	void insert(const value_type& value) {
+	void insert_or_assign(const value_type& value) {
 		std::lock_guard lck(mutex);
-		map_->insert(value);
+		map_->insert_or_assign(value.first, value.second);
 	}
 
 	std::size_t erase(const key_type key) {
@@ -48,7 +49,7 @@ public:
 		return map_->erase(key);
 	}
 
-	const value_type& at(const key_type key) const {
+	const V& at(const key_type key) const {
 		std::lock_guard lck(mutex);
 		return map_->at(key);
 	}
