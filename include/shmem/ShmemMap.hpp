@@ -9,6 +9,7 @@
 
 namespace shmem {
 
+// Shared memory map
 template <typename K, typename V>
 class ShmemMap {
 public:
@@ -39,16 +40,19 @@ public:
 		allocator_.deallocate(map_, 1);
 	}
 
+	// insert new element or assign if exists
 	void insert_or_assign(const value_type& value) {
 		std::lock_guard lck(mutex);
 		map_->insert_or_assign(value.first, value.second);
 	}
 
+	// try to erase elemet
 	std::size_t erase(const key_type key) {
 		std::lock_guard lck(mutex);
 		return map_->erase(key);
 	}
 
+	// try to access element
 	const V& at(const key_type key) const {
 		std::lock_guard lck(mutex);
 		return map_->at(key);
@@ -68,9 +72,9 @@ public:
 	}
 
 private:
-	UnderlyingMap* map_;
-	Alloc<UnderlyingMap> allocator_;
-	mutable SemaphoreMutex<Alloc> mutex;
+	UnderlyingMap* map_;					// map container
+	Alloc<UnderlyingMap> allocator_;		// shared memory allocator
+	mutable SemaphoreMutex<Alloc> mutex;	// map access control mutex
 	
 };
 

@@ -7,6 +7,7 @@
 
 namespace shmem {
 
+// Shared memory pool with allocator
 class Shmem {
 public:
 	Shmem() = delete;
@@ -14,13 +15,14 @@ public:
 
 	~Shmem();
 
+	// Get allocator for shared memory
 	template <typename T>
 	ShmemAllocator<T> get_allocator();
 
 private:
-	void* mmap_;
-	std::size_t size_;
-	shmem::ShmemAllocatorState* state_;
+	void* mmap_;						// Pointer to shared memory start
+	std::size_t size_;					// Shared memory size
+	shmem::ShmemAllocatorState* state_;	// State of allocator
 };
 
 template <typename T>

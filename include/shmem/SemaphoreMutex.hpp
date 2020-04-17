@@ -5,6 +5,7 @@
 
 namespace shmem {
 
+// Mutex based on linux semaphore with allocator parameter
 template <
 	template <typename T> 
 	typename Alloc
@@ -25,16 +26,18 @@ public:
 		allocator_.deallocate(semaphore_, 1);
 	}
 
+	// Lock mutex
 	void lock() {
 		::sem_wait(semaphore_);
 	}
 
+	// Unlock mutex
 	void unlock() {
 		::sem_post(semaphore_);
 	}
 
 private:
-	sem_t* semaphore_;
-	Alloc<sem_t> allocator_;
+	sem_t* semaphore_;			// semaphore for access
+	Alloc<sem_t> allocator_;	// allocator allowing memory allocation for semaphore
 };
 }
