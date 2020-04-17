@@ -1,5 +1,7 @@
 
 #include <iostream>
+#include <string>
+#include <iostream>
 
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -14,24 +16,32 @@ int main() {
 
 	shmem::Shmem mmap(mmap_size);
 
-	shmem::ShmemMap<int, char> map(mmap.get_allocator<std::pair<int, char>>());
+	using MyString = std::basic_string<char, std::char_traits<char>, shmem::ShmemAllocator<char>>;
+
+	auto alloc = mmap.get_allocator<std::pair<MyString, char>>();
+	shmem::ShmemMap<MyString, char> map(alloc);
+
 
 	int pid = ::fork();
 	if (pid != 0) { // child
-		map.insert_or_assign({0, 'c'});
-		map.insert_or_assign({1, 'c'});
+		try{
+			map.insert_or_assign({"first write", 'c'});
 
-		map.insert_or_assign({2, 'u'});
-		map.insert_or_assign({3, 'c'});
-		map.insert_or_assign({4, 'c'});
-		map.erase(3);
-		char c = map.at(2);
-		map.insert_or_assign({3, c});
+			map.insert_or_assign({"returned", 'u'});
+			map.insert_or_assign({"erased", 'c'});
+			map.insert_or_assign({"updated", 'c'});
+			map.erase("erased");
+			char c = map.at("returned");
+			map.insert_or_assign({"updated", c});
+		}
+		catch (const std::exception& e) {
+			std::cerr << "Child error: " << e.what() << std::endl;
+		}
 		exit(0);
 	}
 	else { // parent
-		map.insert_or_assign({0, 'p'});
-		map.insert_or_assign({1, 'p'});
+		map.insert_or_assign({"first write", 'p'});
+		map.insert_or_assign({"second write", 'p'});
 	}
 	::waitpid(pid, nullptr, 0);
 

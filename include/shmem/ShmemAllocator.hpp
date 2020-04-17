@@ -16,6 +16,10 @@ class ShmemAllocator {
 public:
 	using value_type = T;
 
+	ShmemAllocator() noexcept :
+		state_(nullptr) {
+	}
+
 	ShmemAllocator(ShmemAllocatorState* state) noexcept :
 		state_(state) {
 	}

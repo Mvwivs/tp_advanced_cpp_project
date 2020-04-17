@@ -7,5 +7,4 @@ add_executable(shmem_example
 
 target_link_libraries(shmem_example
 	shmem
-	pthread
 )
