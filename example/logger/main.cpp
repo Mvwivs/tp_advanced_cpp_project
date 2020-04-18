@@ -7,7 +7,7 @@
 
 int main() {
 
-	auto log = std::unique_ptr<logger::BaseLogger>(new logger::StdoutLogger());
+	auto log = logger::create_stdout_logger();
 
 	log->debug("Some debug info");
 	log->info("Breaking news: ...");

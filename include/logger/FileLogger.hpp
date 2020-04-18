@@ -15,11 +15,11 @@ public:
 	virtual ~FileLogger() = default;
 
 	// flush logger buffers
-	virtual void flush() override;
+	void flush() override;
 
 protected:
 	// write message to log target
-	virtual void log_full_message(const std::string& full_message) override;
+	void log_full_message(const std::string& full_message) override;
 
 private:
 	std::ofstream log_file; // logger output file
