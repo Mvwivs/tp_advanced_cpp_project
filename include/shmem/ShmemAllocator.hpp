@@ -17,10 +17,6 @@ class ShmemAllocator {
 public:
 	using value_type = T;
 
-	ShmemAllocator() noexcept :
-		state_(nullptr) {
-	}
-
 	ShmemAllocator(ShmemAllocatorState* state) noexcept :
 		state_(state) {
 	}
@@ -30,10 +26,6 @@ public:
 
 	template <typename U>
 	ShmemAllocator(const ShmemAllocator<U>& other) noexcept :
-		state_(other.state_) {
-	}
-
-	ShmemAllocator(const ShmemAllocator& other) noexcept :
 		state_(other.state_) {
 	}
 

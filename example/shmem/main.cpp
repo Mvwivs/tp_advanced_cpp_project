@@ -25,14 +25,14 @@ int main() {
 	int pid = ::fork();
 	if (pid != 0) { // child
 		try{
-			map.insert_or_assign({"first write", 'c'});
+			map.insert_or_assign({MyString("first write", alloc), 'c'});
 
-			map.insert_or_assign({"returned", 'u'});
-			map.insert_or_assign({"erased", 'c'});
-			map.insert_or_assign({"updated", 'c'});
-			map.erase("erased");
-			char c = map.at("returned");
-			map.insert_or_assign({"updated", c});
+			map.insert_or_assign({MyString("returned", alloc), 'u'});
+			map.insert_or_assign({MyString("erased", alloc), 'c'});
+			map.insert_or_assign({MyString("updated", alloc), 'c'});
+			map.erase(MyString("erased", alloc));
+			char c = map.at(MyString("returned", alloc));
+			map.insert_or_assign({MyString("updated", alloc), c});
 		}
 		catch (const std::exception& e) {
 			std::cerr << "Child error: " << e.what() << std::endl;
@@ -40,8 +40,8 @@ int main() {
 		exit(0);
 	}
 	else { // parent
-		map.insert_or_assign({"first write", 'p'});
-		map.insert_or_assign({"second write", 'p'});
+		map.insert_or_assign({MyString("first write", alloc), 'p'});
+		map.insert_or_assign({MyString("second write", alloc), 'p'});
 	}
 	::waitpid(pid, nullptr, 0);
 

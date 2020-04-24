@@ -23,8 +23,6 @@ Shmem::Shmem(const std::size_t size):
 Shmem::~Shmem() {
 	if (mmap_) {
 		::munmap(mmap_, size_);
-		mmap_ = nullptr;
-		state_ = nullptr;
 	}
 }
 

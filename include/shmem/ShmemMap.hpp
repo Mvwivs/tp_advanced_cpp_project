@@ -21,7 +21,7 @@ public:
 	using Alloc = shmem::ShmemAllocator<T>;
 
 	using UnderlyingMap = std::map<K, V,
-						typename std::map<K, V>::key_compare,
+						std::less<K>,
 						Alloc<value_type>>;
 
 	using iterator = typename std::map<K, V>::iterator;
@@ -54,7 +54,7 @@ public:
 	}
 
 	// try to access element
-	const V& at(const key_type key) const {
+	V at(const key_type key) const {
 		std::lock_guard lck(mutex);
 		return map_->at(key);
 	}
