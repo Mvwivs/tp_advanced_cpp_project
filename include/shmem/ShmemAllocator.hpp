@@ -26,7 +26,7 @@ public:
 	}
 
 	template <typename U>
-    friend class ShmemAllocator; // access state of other allocator
+	friend class ShmemAllocator; // access state of other allocator
 
 	template <typename U>
 	ShmemAllocator(const ShmemAllocator<U>& other) noexcept :

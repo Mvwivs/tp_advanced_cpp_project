@@ -25,7 +25,7 @@ public:
 						Alloc<value_type>>;
 
 	using iterator = typename std::map<K, V>::iterator;
-    using const_iterator = typename std::map<K, V>::const_iterator;
+	using const_iterator = typename std::map<K, V>::const_iterator;
 
 
 	ShmemMap(Alloc<value_type> allocator):
@@ -61,13 +61,13 @@ public:
 	iterator begin() {
 		return map_->begin();
 	}
-    const_iterator begin() const {
+	const_iterator begin() const {
 		return map_->begin();
 	}
-    iterator end() {
+	iterator end() {
 		return map_->end();
 	}
-    const_iterator end() const {
+	const_iterator end() const {
 		return map_->end();
 	}
 
