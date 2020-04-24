@@ -20,10 +20,11 @@ void echo(tcp::Connection& connection) {
 
 int main() {
 
-	tcp::Address server_address("127.0.0.1", 8888);
+	tcp::Address server_address("127.0.0.1", 88881);
 
 	std::future<bool> server_future = std::async([&server_address] {
-		std::vector<char> data(100000000, 'a');
+		std::vector<char> data(100000000);
+		std::generate(data.begin(), data.end(), [n = 0] () mutable { return (n++) % 100; });
 		std::size_t to_read = data.size();
 		std::size_t to_write = data.size();
 
