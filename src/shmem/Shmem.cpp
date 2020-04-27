@@ -18,12 +18,18 @@ Shmem::Shmem(const std::size_t size):
 	state_ = static_cast<shmem::ShmemAllocatorState*>(mmap_);
 	state_->start = static_cast<char*>(mmap_) + sizeof(*state_);
 	state_->end = static_cast<char*>(mmap_) + size_;
+
+	::sem_init(&state_->mtx_, 1, 1);
 }
 
 Shmem::~Shmem() {
+}
+
+void Shmem::destroy() {
 	if (mmap_) {
 		::munmap(mmap_, size_);
 	}
+	::sem_destroy(&state_->mtx_);
 }
 
 }

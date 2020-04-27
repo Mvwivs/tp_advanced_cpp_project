@@ -14,6 +14,7 @@ public:
 	Shmem(const std::size_t size);
 
 	~Shmem();
+	void destroy();
 
 	// Get allocator for shared memory
 	template <typename T>

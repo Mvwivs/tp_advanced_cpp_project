@@ -37,7 +37,6 @@ public:
 	}
 
 	~ShmemMap() {
-		map_->~UnderlyingMap();
 		allocator_.deallocate(map_, 1);
 	}
 

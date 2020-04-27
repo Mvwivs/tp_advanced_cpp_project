@@ -48,6 +48,7 @@ int main() {
 	for (const auto& [key, val] : map) {
 		std::cout << key << " - " << val << std::endl;
 	}
-	
+
+	mmap.destroy();
 	return 0;
 }
