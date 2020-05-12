@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string_view>
 #include <cstring>
+#include <functional>
 #include <chrono>
 
 #include <sys/epoll.h>
@@ -25,6 +26,8 @@
 using namespace std::string_literals;
 
 namespace http {
+
+using FormResponse_cb = std::function<http::HTTP::Response(const http::HTTP::Request&)>;
 
 struct ClientState {
 	ClientState(Coroutine::routine_t new_id) :
@@ -49,12 +52,15 @@ struct ClientState {
 class Worker {
 public:
 
-	Worker() {
+	Worker(FormResponse_cb callback):
+		formResponse(callback) {
 		epoll = std::move(fd_t{epoll_create1(0)});
 		if (!epoll) {
 			throw std::runtime_error("Unable to create epoll: "s + std::strerror(errno));
 		}
 	}
+	Worker(Worker&& other) = default;
+	~Worker() = default;
 
 	void addClient(int client_fd) {
 		epoll_event e{};
@@ -106,10 +112,6 @@ public:
 
 		}
 	}
-
-	// http::HTTP::Response onRequest(const http::HTTP::Request& request) {
-
-	// }
 
 private:
 	bool handleClient(int fd, uint32_t event) {
@@ -232,11 +234,7 @@ private:
 				}
 			}
 
-			http::HTTP::Response resp {
-				{http::HTTP::Version::HTTP_1_1, http::HTTP::StatusCode{200}},
-				{{"Connection", "Keep-Alive"}},
-				{"<some> HTML </some>"}
-			};
+			http::HTTP::Response resp = formResponse(request);
 
 			std::string resp_str = resp.to_string();
 			client.process_state = ClientState::WritingResponse;
@@ -269,11 +267,10 @@ private:
 	}
 
 private:
-	std::size_t worker_count_;
-	std::atomic<bool> running;
-
 	std::unordered_map<int, ClientState> clients;
 	fd_t epoll;
+
+	FormResponse_cb formResponse;
 };
 
 }

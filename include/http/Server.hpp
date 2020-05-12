@@ -7,7 +7,9 @@ namespace http {
 
 class Server {
 public:
-	Server(const tcp::Address& address) {
+	Server(const tcp::Address& address, std::size_t worker_count = std::thread::hardware_concurrency() - 1):
+		load_balancing(0) {
+
 		epoll = std::move(fd_t{epoll_create1(0)});
 		if (!epoll) {
 			throw std::runtime_error("Unable to create epoll: "s + std::strerror(errno));
@@ -22,10 +24,21 @@ public:
 		if (res == -1) {
 			throw std::runtime_error("Unable to add to server epoll: "s + std::strerror(errno));
 		}
+
+		workers.reserve(worker_count);
+		for (std::size_t i = 0; i < worker_count; ++i) {
+			workers.emplace_back(
+			    [this](const http::HTTP::Request& req) { return this->onRequest(req); });
+		}
 	}
+	virtual ~Server() = default;
 
 	void run() {
-		std::thread work([this] { this->worker.run(); });
+		std::vector<std::thread> executors;
+		executors.reserve(workers.size());
+		for (auto& worker : workers) {
+			executors.emplace_back(&Worker::run, std::ref(worker));
+		}
 		while (true) {
 			constexpr std::size_t epoll_size = 100;
 			std::array<epoll_event, epoll_size> events;
@@ -42,6 +55,8 @@ public:
 			}
 		}
 	}
+
+	virtual http::HTTP::Response onRequest(const http::HTTP::Request& request) = 0;
 
 private:
 	void openServer(const tcp::Address& address) {
@@ -91,7 +106,7 @@ private:
 				}
 			}
 
-			worker.addClient(client_fd);
+			workers[(load_balancing++) % workers.size()].addClient(client_fd);
 			return;
 		}
 	}
@@ -100,7 +115,8 @@ private:
 	fd_t server;
 	fd_t epoll;
 
-	Worker worker;
+	std::vector<Worker> workers;
+	std::size_t load_balancing;
 };
 
 }

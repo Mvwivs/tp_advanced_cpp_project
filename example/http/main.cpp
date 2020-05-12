@@ -8,11 +8,29 @@
 #include "tcp/Connection.hpp"
 #include "http/Server.hpp"
 
+namespace HTTP = http::HTTP;
+
+class MyServer : public http::Server {
+public:
+	MyServer(const tcp::Address& address) :
+		http::Server(address) {
+	}
+	~MyServer() = default;
+	HTTP::Response onRequest(const HTTP::Request& request) override {
+		HTTP::Response resp {
+			{HTTP::Version::HTTP_1_1, http::HTTP::StatusCode{200}},
+			{{"Connection", "Keep-Alive"}},
+			{"<some> HTML </some>"}
+		};
+		return resp;
+	}
+};
+
 int main() {
 
 	tcp::Address server_address("127.0.0.1", 8888);
 
-	http::Server server(server_address);
+	MyServer server(server_address);
 
 	server.run();
 
