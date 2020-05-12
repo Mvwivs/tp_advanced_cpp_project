@@ -131,18 +131,17 @@ void entry()
 {
 	auto& o = ordinator;
 	routine_t id = o.current;
-	auto &routine = o.routines[id - 1];
 
-	if (routine.func) try
+	if (o.routines[id - 1].func) try
 	{
-		routine.func();
+		o.routines[id - 1].func();
 	}
 	catch (...)
 	{
-		routine.exception = std::current_exception();
+		o.routines[id - 1].exception = std::current_exception();
 	}
 
-	routine.finished = true;
+	o.routines[id - 1].finished = true;
 	o.current = 0;
 	o.finished.emplace(id);
 }

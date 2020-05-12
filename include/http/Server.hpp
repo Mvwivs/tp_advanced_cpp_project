@@ -27,7 +27,7 @@ public:
 	void run() {
 		std::thread work([this] { this->worker.run(); });
 		while (true) {
-			constexpr std::size_t epoll_size = 101;
+			constexpr std::size_t epoll_size = 100;
 			std::array<epoll_event, epoll_size> events;
 			int recieved = epoll_wait(epoll.fd, events.data(), epoll_size, -1);
 			if (recieved < 0) {
@@ -66,7 +66,7 @@ private:
 			throw std::runtime_error("Unable to bind server socket: "s + std::strerror(errno));
 		}
 
-		res = listen(server.fd, 101);
+		res = listen(server.fd, 100);
 		if (res == -1) {
 			throw std::runtime_error("Unable to mark server socket as listening: "s + std::strerror(errno));
 		}

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string_view>
 #include <cstring>
+#include <chrono>
 
 #include <sys/epoll.h>
 #include <netinet/in.h>
@@ -28,15 +29,21 @@ namespace http {
 struct ClientState {
 	ClientState(Coroutine::routine_t new_id) :
 		id(new_id),
-		keep_alive(),
-		process_state(ReadingRequest) {
+		keep_alive(false),
+		process_state(ReadingRequest),
+		start(std::chrono::system_clock::now()) {
 	}
+	ClientState(const ClientState& other) = default;
 	Coroutine::routine_t id;
-	struct KeepAlive {
-		int time;
-	};
-	std::optional<KeepAlive> keep_alive;
+	bool keep_alive;
 	enum { ReadingRequest, WritingResponse } process_state;
+
+	std::chrono::time_point<std::chrono::system_clock> start;
+	bool timed_out() const {
+		auto now = std::chrono::system_clock::now();
+		auto limit = std::chrono::seconds(10);
+		return ((now - start) > limit);
+	}
 };
 
 class Worker {
@@ -61,14 +68,24 @@ public:
 
 	void run() {
 		while (true) {
-			constexpr std::size_t epoll_size = 101;
+			constexpr std::size_t epoll_size = 100;
 			std::array<epoll_event, epoll_size> events;
-			int recieved = epoll_wait(epoll.fd, events.data(), epoll_size, -1);
+			int recieved = epoll_wait(epoll.fd, events.data(), epoll_size, 10000);
 			if (recieved < 0) {
-				if (errno == EINTR) {
+				if (errno == EINTR) { // check timeout on connections
 					continue;
 				}
 				throw std::runtime_error("Epoll wait error: "s + std::strerror(errno));
+			}
+			if (recieved == 0) {
+				for(auto it = clients.begin(); it != clients.end(); ) {
+					if (handleClient(it->first, 0)) {
+						it = clients.erase(it);
+					} else {
+						++it;
+					}
+				}
+				continue;
 			}
 
 			for (int i = 0; i < recieved; ++i) {
@@ -81,7 +98,10 @@ public:
 					std::cout << "Created coroutine " << id  << '-' << fd << std::endl;
 					clients.emplace(fd, ClientState{id});
 				}
-				handleClient(fd, event);
+				bool erase = handleClient(fd, event);
+				if (erase) {
+					clients.erase(fd);
+				}
 			}
 
 		}
@@ -92,7 +112,7 @@ public:
 	// }
 
 private:
-	void handleClient(int fd, uint32_t event) {
+	bool handleClient(int fd, uint32_t event) {
 		if (event & EPOLLIN) {
 			std::cout << "EPOLLIN ";
 		}
@@ -109,18 +129,16 @@ private:
 		std::cout << "Exit, resume res: " << resume_res << std::endl;
 		bool finished = Coroutine::finished(client.id);
 		if (finished) {
-			if (!client.keep_alive) { // close
+			if (!client.keep_alive || client.timed_out()) { // close
 				::close(fd);
-				clients.erase(fd);
 				std::cout << "client close " << fd << std::endl;
-				return;
+				return true;
 			}
 		}
 		bool reading = true;
 		if (client.process_state == ClientState::WritingResponse) {
 			reading = false;
 		}
-		// check timeout
 
 		epoll_event e{};
 		e.data.fd = fd;
@@ -135,19 +153,24 @@ private:
 			std::cerr << std::strerror(errno) << std::endl;
 			throw std::runtime_error("Unable to re-add to epoll: "s + std::strerror(errno));
 		}
+		return false;
 	}
 
 	void serveClient(int fd) {
-		while (clients.at(fd).process_state == ClientState::ReadingRequest) {
+		ClientState& client = clients.at(fd);
+		while (client.process_state == ClientState::ReadingRequest) {
 			std::vector<char> full_data;
 			http::HTTP::Request request;
 
 			while (true) {
+				if (client.timed_out()) {
+					return;
+				}
 				std::array<char, 400> buffer;
 				ssize_t recieved = ::read(fd, buffer.data(), buffer.size());
 				std::cout << "data recieved " << fd << " " << recieved << std::endl;
 				if (recieved == 0) { // connection closed
-					clients.at(fd).keep_alive = {};
+					client.keep_alive = false;
 					return;
 				}
 				else if (recieved == -1) {
@@ -168,7 +191,7 @@ private:
 					try {
 						const std::string& type = request.getHeader("Connection");
 						if (type == "Keep-Alive") {
-							clients.at(fd).keep_alive = ClientState::KeepAlive{2};
+							client.keep_alive = true;
 						}
 					}
 					catch (const http::HTTP::ParsingException&) { // no keep-alive
@@ -180,11 +203,14 @@ private:
 						std::vector<char> body(head_end + 4, full_data.end());
 						std::size_t to_read = body_len - body.size();
 						while (to_read != 0) {
+							if (client.timed_out()) {
+								return;
+							}
 							std::array<char, 400> buffer;
 							ssize_t recieved = ::read(fd, buffer.data(), buffer.size());
 							std::cout << "data recieved " << fd << " " << recieved << std::endl;
 							if (recieved == 0) { // connection closed
-								clients.at(fd).keep_alive = {};
+								client.keep_alive = false;
 								return;
 							}
 							else if (recieved == -1) {
@@ -213,10 +239,13 @@ private:
 			};
 
 			std::string resp_str = resp.to_string();
-			clients.at(fd).process_state = ClientState::WritingResponse;
+			client.process_state = ClientState::WritingResponse;
 
 			size_t written = 0;
 			while (resp_str.size() - written != 0) {
+				if (client.timed_out()) {
+					return;
+				}
 				ssize_t res = ::write(fd, resp_str.data() + written, resp_str.size() - written);
 				std::cout << "data sent " << fd << " " << res << std::endl;
 				if (res == 0) {
@@ -231,8 +260,8 @@ private:
 				}
 				written += res;
 			}
-			if (clients.at(fd).keep_alive) {
-				clients.at(fd).process_state = ClientState::ReadingRequest;
+			if (client.keep_alive) {
+				client.process_state = ClientState::ReadingRequest;
 			}
 		}
 		std::cout << "Exiting " << fd << std::endl;
