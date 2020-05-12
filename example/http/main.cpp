@@ -14,12 +14,9 @@ int main() {
 
 	http::Server server(server_address);
 
-	std::future<bool> server_future = std::async([&server] {
-		server.run();
-		return true;
-	});
+	server.run();
 
-	tcp::Connection client(server_address);
+	// tcp::Connection client(server_address);
 
 	std::string data = "GET /api/v2 HTTP/1.1\r\n"
 						"Host: www.nowhere123.com\r\n"
@@ -30,12 +27,12 @@ int main() {
 						"Content-Length: 3\r\n"
 						"\r\n"
 						"123";
-	client.writeExact(data.data(), data.size());
-	while (true) {
-		char c;
-		client.readExact(&c, 1);
-		std::cout << c;
-	}
+	// client.writeExact(data.data(), data.size());
+	// while (true) {
+	// 	char c;
+	// 	client.readExact(&c, 1);
+	// 	std::cout << c;
+	// }
 
 	return 0;
 }

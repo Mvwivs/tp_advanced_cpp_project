@@ -38,6 +38,11 @@ struct Routine
 		func = f;
 		finished = false;
 		exception = {};
+
+		ctx.uc_stack.ss_sp = stack.get();
+		ctx.uc_stack.ss_size = Ordinator::STACK_SIZE;
+		ctx.uc_link = &ordinator.ctx;
+		getcontext(&ctx);
 		makecontext(&ctx, entry, 0);
 	}
 
@@ -110,6 +115,13 @@ void yield()
 routine_t current()
 {
 	return ordinator.current;
+}
+
+bool finished(routine_t id) {
+	auto& o = ordinator;
+
+	const auto& routine = o.routines[id - 1];
+	return routine.finished;
 }
 
 namespace
