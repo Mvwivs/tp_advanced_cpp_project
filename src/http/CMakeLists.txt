@@ -1,6 +1,10 @@
 
 add_library(http
-		tmp.cpp
+		HTTP.cpp
+		fd.cpp
+		Worker.cpp
+		Server.cpp
+		ClientState.cpp
 )
 
 target_link_libraries(http
