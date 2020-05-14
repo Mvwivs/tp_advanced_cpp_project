@@ -78,10 +78,16 @@ struct Header {
 	std::string value;
 };
 
+struct Parameter {
+	std::string name;
+	std::string value;
+};
+
 struct Request {
 	StartLine startLine;
 	std::vector<Header> headers;
 	std::optional<std::string> body;
+	std::optional<std::vector<Parameter>> parameters;
 
 	Request() = default;
 
@@ -124,6 +130,24 @@ struct Request {
 		if (ss) {
 			body = std::string(ss.str().substr(ss.tellg()));
 		}
+
+		if (method == Method::GET) {
+			std::size_t param_pos = startLine.target.find('?');
+			if (param_pos != std::string::npos) {
+				parseParameters(startLine.target.substr(param_pos + 1));
+				startLine.target = startLine.target.substr(0, param_pos);
+			}
+		}
+		else if (method == Method::POST) {
+			try {
+				const std::string& type = getHeader("Content-Type");
+				if (type == "application/x-www-form-urlencoded" && body) {
+					parseParameters(*body);
+				}
+			}
+			catch (const ParsingException& e) {
+			}
+		}
 	}
 
 	const std::string& getHeader(const std::string& header_name) const {
@@ -133,6 +157,26 @@ struct Request {
 			}
 		}
 		throw ParsingException("Header not found");
+	}
+private:
+	void parseParameters(const std::string& data) {
+		std::vector<Parameter> params;
+
+		std::size_t prev_param_end = 0;
+		for (std::size_t equal_char = 0; 
+			(equal_char = data.find('=', prev_param_end)) != std::string::npos;) {
+
+			std::size_t and_char = data.find('&', equal_char + 1);
+			params.push_back({data.substr(prev_param_end, equal_char - prev_param_end),
+				data.substr(equal_char + 1, and_char - (equal_char + 1))});
+			if (and_char == std::string::npos) {
+				break;
+			}
+			prev_param_end = and_char + 1;
+		}
+		if (!params.empty()) {
+			parameters = params;
+		}
 	}
 };
 

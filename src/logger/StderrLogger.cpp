@@ -8,7 +8,7 @@ void StderrLogger::flush() {
 }
 
 void StderrLogger::log_full_message(const std::string& full_message) {
-	std::cerr << full_message << std::endl;
+	std::cerr << full_message + "\n";
 }
 
 }

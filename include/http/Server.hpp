@@ -67,7 +67,7 @@ public:
 		for (auto& exec : executors) {
 			exec.join();
 		}
-		std::cout << "Server stopped" << std::endl;
+		stdout_log->info("Server stopped");
 	}
 
 	void stop() {
@@ -111,7 +111,6 @@ private:
 		while (true) {
 			int client_fd = accept4(server.fd, reinterpret_cast<sockaddr*>(&client_addr), 
 				&client_len, SOCK_NONBLOCK);
-			std::cout << "client connected " << client_fd << std::endl;
 			if (client_fd == -1) {
 				if (errno == EINTR) {
 					continue;

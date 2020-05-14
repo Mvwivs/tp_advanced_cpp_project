@@ -110,7 +110,6 @@ public:
 				if (clients.find(fd) == clients.end()) {
 					Coroutine::routine_t id = Coroutine::create(
 						[this, fd] { this->serveClient(fd); });
-					std::cout << "Created coroutine " << id  << '-' << fd << std::endl;
 					clients.emplace(fd, ClientState{id});
 				}
 				bool erase = handleClient(fd, event);
@@ -137,25 +136,12 @@ public:
 
 private:
 	bool handleClient(int fd, uint32_t event) {
-		if (event & EPOLLIN) {
-			std::cout << "EPOLLIN ";
-		}
-		if (event & EPOLLOUT) {
-			std::cout << "EPOLLOUT ";
-		}
-		if (event & EPOLLRDHUP) {
-			std::cout << "EPOLLRDHUP ";
-		}
-
 		ClientState& client = clients.at(fd);
-		std::cout << "Resuming coroutine " << client.id  << '-' << fd << std::endl;
 		bool resume_res = Coroutine::resume(client.id);
-		std::cout << "Exit, resume res: " << resume_res << std::endl;
 		bool finished = Coroutine::finished(client.id);
 		if (finished) {
 			if (!client.keep_alive || client.timed_out()) { // close
 				::close(fd);
-				std::cout << "client close " << fd << std::endl;
 				return true;
 			}
 		}
@@ -192,7 +178,6 @@ private:
 				}
 				std::array<char, 400> buffer;
 				ssize_t recieved = ::read(fd, buffer.data(), buffer.size());
-				std::cout << "data recieved " << fd << " " << recieved << std::endl;
 				if (recieved == 0) { // connection closed
 					client.keep_alive = false;
 					return;
@@ -232,7 +217,6 @@ private:
 							}
 							std::array<char, 400> buffer;
 							ssize_t recieved = ::read(fd, buffer.data(), buffer.size());
-							std::cout << "data recieved " << fd << " " << recieved << std::endl;
 							if (recieved == 0) { // connection closed
 								client.keep_alive = false;
 								return;
@@ -250,7 +234,6 @@ private:
 						request.body = std::string(body.begin(), body.end());
 					}
 					catch (const http::HTTP::ParsingException&) { // no body, finish reading
-						std::cout << "What" << std::endl;
 					}
 					break;
 				}
@@ -267,7 +250,6 @@ private:
 					return;
 				}
 				ssize_t res = ::write(fd, resp_str.data() + written, resp_str.size() - written);
-				std::cout << "data sent " << fd << " " << res << std::endl;
 				if (res == 0) {
 					throw std::runtime_error("Unable to write, EOF: "s + std::strerror(errno));
 				}
@@ -284,7 +266,6 @@ private:
 				client.process_state = ClientState::ReadingRequest;
 			}
 		}
-		std::cout << "Exiting " << fd << std::endl;
 		return;
 	}
 

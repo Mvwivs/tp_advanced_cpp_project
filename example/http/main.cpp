@@ -9,6 +9,12 @@
 #include "tcp/Connection.hpp"
 #include "http/Server.hpp"
 
+static std::function<void(int)> signalHandler = [] (int) {
+};
+static void sig_handler(int signal) {
+	signalHandler(signal);
+}
+
 namespace HTTP = http::HTTP;
 
 class MyServer : public http::Server {
@@ -18,7 +24,18 @@ public:
 	}
 	~MyServer() = default;
 	HTTP::Response onRequest(const HTTP::Request& request) override {
-		http::Server::stdout_log->info("Recieved request to" + request.startLine.target);
+		http::Server::stdout_log->info("Recieved request to " + request.startLine.target);
+		if (request.parameters) {
+			http::Server::stdout_log->debug("Parameters: ");
+			for (const auto& [name, value] : *request.parameters) {
+				http::Server::stdout_log->debug("\t" + name + " -> " + value);
+			}
+		}
+		http::Server::stdout_log->debug("Headers: ");
+		for (const auto& [name, value] : request.headers) {
+			http::Server::stdout_log->debug("\t" + name + " -> " + value);
+		}
+		
 		HTTP::Response resp {
 			{HTTP::Version::HTTP_1_1, http::HTTP::StatusCode{200}},
 			{{"Connection", "Keep-Alive"}},
@@ -27,13 +44,6 @@ public:
 		return resp;
 	}
 };
-
-static std::function<void(int)> signalHandler = [] (int) {
-};
-
-static void sig_handler(int signal) {
-	signalHandler(signal);
-}
 
 int main() {
 	signal(SIGINT, sig_handler);
@@ -46,7 +56,7 @@ int main() {
 	std::thread w([&server] { server.run(); });
 
 	tcp::Connection client(server_address);
-	std::string data = "GET /api/v2 HTTP/1.1\r\n"
+	std::string data = "GET /api/v2?parameter=value&also=another HTTP/1.1\r\n"
 						"Host: www.nowhere123.com\r\n"
 						"Accept: image/gif, image/jpeg, */*\r\n"
 						"Accept-Language: en-us\r\n"
@@ -56,12 +66,14 @@ int main() {
 						"\r\n"
 						"123";
 	client.writeExact(data.data(), data.size());
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	std::cout << "Client recieved test response:" << std::endl;
-	
 	char c[100];
 	for (std::size_t received = 0; (received = client.read(&c, 100));) {
 		std::cout.write(c, received);
 	}
+	std::cout << std::endl;
 
 	w.join();
 

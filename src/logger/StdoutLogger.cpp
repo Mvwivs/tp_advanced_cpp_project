@@ -8,7 +8,7 @@ void StdoutLogger::flush() {
 }
 
 void StdoutLogger::log_full_message(const std::string& full_message) {
-	std::cout << full_message << std::endl;
+	std::cout << full_message + "\n";
 }
 
 }
