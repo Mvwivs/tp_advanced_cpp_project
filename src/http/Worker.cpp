@@ -113,99 +113,21 @@ bool Worker::handleClient(int fd) {
 void Worker::serveClient(int fd) {
 	ClientState& client = clients.at(fd);
 	while (client.process_state == ClientState::ReadingRequest) {
-		std::vector<char> full_data;
-		http::HTTP::Request request;
-
-		while (true) {
-			if (client.timed_out()) {
-				return;
-			}
-			std::array<char, 400> buffer;
-			ssize_t recieved = ::read(fd, buffer.data(), buffer.size());
-			if (recieved == 0) { // connection closed
-				client.keep_alive = false;
-				return;
-			}
-			else if (recieved == -1) {
-				if (errno == EAGAIN || errno == EWOULDBLOCK) {
-					Coroutine::yield();
-					continue;
-				}
-				throw std::runtime_error("Unable to read: "s + std::strerror(errno));
-			}
-
-			full_data.insert(full_data.end(), buffer.begin(), buffer.begin() + recieved);
-
-			constexpr std::string_view endSeq = "\r\n\r\n";
-			auto head_end = std::search(full_data.end() - recieved - 3, full_data.end(),
-				endSeq.begin(), endSeq.end());
-			if (head_end != full_data.end()) { // found \r\n\r\n in header
-				request = http::HTTP::Request(std::string(full_data.begin(), head_end + 2));
-				try {
-					const std::string& type = request.getHeader("Connection");
-					if (type == "Keep-Alive") {
-						client.keep_alive = true;
-					}
-				}
-				catch (const http::HTTP::ParsingException&) { // no keep-alive
-				}
-				try {
-					const std::string& len = request.getHeader("Content-Length");
-					std::size_t body_len = std::stoull(len);
-
-					std::vector<char> body(head_end + 4, full_data.end());
-					std::size_t to_read = body_len - body.size();
-					while (to_read != 0) {
-						if (client.timed_out()) {
-							return;
-						}
-						std::array<char, 400> buffer;
-						ssize_t recieved = ::read(fd, buffer.data(), buffer.size());
-						if (recieved == 0) { // connection closed
-							client.keep_alive = false;
-							return;
-						}
-						else if (recieved == -1) {
-							if (errno == EAGAIN || errno == EWOULDBLOCK) {
-								Coroutine::yield();
-								continue;
-							}
-							throw std::runtime_error("Unable to read: "s + std::strerror(errno));
-						}
-						body.insert(body.end(), buffer.begin(), buffer.begin() + recieved);
-						to_read -= recieved;
-					}
-					request.body = std::string(body.begin(), body.end());
-				}
-				catch (const http::HTTP::ParsingException&) { // no body, finish reading
-				}
-				break;
-			}
+		std::optional<http::HTTP::Request> request = client.readRequest(fd);
+		if (!request) {
+			return;
 		}
 
-		http::HTTP::Response resp = formResponse(request);
+		http::HTTP::Response response = formResponse(*request);
 
-		std::string resp_str = resp.to_string();
+		
 		client.process_state = ClientState::WritingResponse;
 
-		size_t written = 0;
-		while (resp_str.size() - written != 0) {
-			if (client.timed_out()) {
-				return;
-			}
-			ssize_t res = ::write(fd, resp_str.data() + written, resp_str.size() - written);
-			if (res == 0) {
-				throw std::runtime_error("Unable to write, EOF: "s + std::strerror(errno));
-			}
-			else if (res == -1) {
-				if (errno == EAGAIN || errno == EWOULDBLOCK) {
-					Coroutine::yield();
-					continue;
-				}
-				throw std::runtime_error("Unable to write: "s + std::strerror(errno));
-			}
-			written += res;
+		bool result = client.sendResponse(fd, response);
+		if (!result) {
+			return;
 		}
+
 		if (client.keep_alive) {
 			client.process_state = ClientState::ReadingRequest;
 		}

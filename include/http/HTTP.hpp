@@ -84,6 +84,8 @@ struct Response {
 	std::string to_string() const;
 };
 
+constexpr std::string_view end_seq = "\r\n\r\n";
+
 } // namespace HTTP
 
 } // namespace http
