@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "logger/Logger.hpp"
 #include "Worker.hpp"
 
 namespace http {
@@ -8,8 +9,13 @@ namespace http {
 class Server {
 public:
 	Server(const tcp::Address& address, std::size_t worker_count = std::thread::hardware_concurrency() - 1):
-		load_balancing(0) {
+		stdout_log(logger::create_stdout_logger()),
+		stderr_log(logger::create_stderr_logger()),
+		file_log(logger::create_file_logger("server.log")),
 
+		running(false),
+		load_balancing(0) {
+		
 		epoll = std::move(fd_t{epoll_create1(0)});
 		if (!epoll) {
 			throw std::runtime_error("Unable to create epoll: "s + std::strerror(errno));
@@ -34,15 +40,16 @@ public:
 	virtual ~Server() = default;
 
 	void run() {
+		running = true;
 		std::vector<std::thread> executors;
 		executors.reserve(workers.size());
 		for (auto& worker : workers) {
 			executors.emplace_back(&Worker::run, std::ref(worker));
 		}
-		while (true) {
+		while (running) {
 			constexpr std::size_t epoll_size = 100;
 			std::array<epoll_event, epoll_size> events;
-			int recieved = epoll_wait(epoll.fd, events.data(), epoll_size, -1);
+			int recieved = epoll_wait(epoll.fd, events.data(), epoll_size, 2);
 			if (recieved < 0) {
 				if (errno == EINTR) {
 					continue;
@@ -54,6 +61,17 @@ public:
 				acceptClient();
 			}
 		}
+		for (auto& worker : workers) {
+			worker.stop();
+		}
+		for (auto& exec : executors) {
+			exec.join();
+		}
+		std::cout << "Server stopped" << std::endl;
+	}
+
+	void stop() {
+		running = false;
 	}
 
 	virtual http::HTTP::Response onRequest(const http::HTTP::Request& request) = 0;
@@ -111,7 +129,13 @@ private:
 		}
 	}
 
+public:
+	std::unique_ptr<logger::BaseLogger> stdout_log;
+	std::unique_ptr<logger::BaseLogger> stderr_log;
+	std::unique_ptr<logger::BaseLogger> file_log;
+
 private:
+	std::atomic_bool running;
 	fd_t server;
 	fd_t epoll;
 

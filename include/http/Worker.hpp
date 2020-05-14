@@ -52,15 +52,23 @@ struct ClientState {
 class Worker {
 public:
 
-	Worker(FormResponse_cb callback):
+	Worker(FormResponse_cb callback) :
+		running(false),
 		formResponse(callback) {
 		epoll = std::move(fd_t{epoll_create1(0)});
 		if (!epoll) {
 			throw std::runtime_error("Unable to create epoll: "s + std::strerror(errno));
 		}
 	}
-	Worker(Worker&& other) = default;
-	~Worker() = default;
+	Worker(Worker&& other) :
+		running(other.running.load()),
+		clients(std::move(other.clients)),
+		epoll(std::move(other.epoll)),
+		formResponse(std::move(other.formResponse)) {
+	}
+
+	Worker(const Worker& other) = delete;
+	Worker& operator=(const Worker& other) = delete;
 
 	void addClient(int client_fd) {
 		epoll_event e{};
@@ -73,10 +81,11 @@ public:
 	}
 
 	void run() {
-		while (true) {
+		running = true;
+		while (running) {
 			constexpr std::size_t epoll_size = 100;
 			std::array<epoll_event, epoll_size> events;
-			int recieved = epoll_wait(epoll.fd, events.data(), epoll_size, 10000);
+			int recieved = epoll_wait(epoll.fd, events.data(), epoll_size, 2000);
 			if (recieved < 0) {
 				if (errno == EINTR) { // check timeout on connections
 					continue;
@@ -109,8 +118,21 @@ public:
 					clients.erase(fd);
 				}
 			}
-
 		}
+		// close all clients
+		for(auto it = clients.begin(); it != clients.end(); ) {
+			if (handleClient(it->first, 0)) {
+				::close(it->first);
+				Coroutine::force_finish(it->second.id);
+				it = clients.erase(it);
+			} else {
+				++it;
+			}
+		}
+	}
+
+	void stop() {
+		running = false;
 	}
 
 private:
@@ -267,6 +289,7 @@ private:
 	}
 
 private:
+	std::atomic_bool running;
 	std::unordered_map<int, ClientState> clients;
 	fd_t epoll;
 

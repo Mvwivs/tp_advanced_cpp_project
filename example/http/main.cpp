@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <csignal>
 
 #include "tcp/connection_utils.hpp"
 #include "tcp/Connection.hpp"
@@ -17,6 +18,7 @@ public:
 	}
 	~MyServer() = default;
 	HTTP::Response onRequest(const HTTP::Request& request) override {
+		http::Server::stdout_log->info("Recieved request to" + request.startLine.target);
 		HTTP::Response resp {
 			{HTTP::Version::HTTP_1_1, http::HTTP::StatusCode{200}},
 			{{"Connection", "Keep-Alive"}},
@@ -26,16 +28,24 @@ public:
 	}
 };
 
+static std::function<void(int)> signalHandler = [] (int) {
+};
+
+static void sig_handler(int signal) {
+	signalHandler(signal);
+}
+
 int main() {
+	signal(SIGINT, sig_handler);
+	signal(SIGTERM, sig_handler);
 
 	tcp::Address server_address("127.0.0.1", 8888);
 
 	MyServer server(server_address);
+	signalHandler = [&server] (int) { server.stop(); };
+	std::thread w([&server] { server.run(); });
 
-	server.run();
-
-	// tcp::Connection client(server_address);
-
+	tcp::Connection client(server_address);
 	std::string data = "GET /api/v2 HTTP/1.1\r\n"
 						"Host: www.nowhere123.com\r\n"
 						"Accept: image/gif, image/jpeg, */*\r\n"
@@ -45,12 +55,15 @@ int main() {
 						"Content-Length: 3\r\n"
 						"\r\n"
 						"123";
-	// client.writeExact(data.data(), data.size());
-	// while (true) {
-	// 	char c;
-	// 	client.readExact(&c, 1);
-	// 	std::cout << c;
-	// }
+	client.writeExact(data.data(), data.size());
+	std::cout << "Client recieved test response:" << std::endl;
+	
+	char c[100];
+	for (std::size_t received = 0; (received = client.read(&c, 100));) {
+		std::cout.write(c, received);
+	}
+
+	w.join();
 
 	return 0;
 }

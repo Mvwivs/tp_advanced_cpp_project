@@ -14,6 +14,7 @@ bool resume(routine_t id);
 void yield();
 routine_t current();
 bool finished(routine_t id);
+void force_finish(routine_t id);
 
 template <class F, class ...Args, class = std::enable_if_t<!std::is_invocable_v<F>>>
 routine_t create(F&& f, Args&&... args)

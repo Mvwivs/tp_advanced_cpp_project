@@ -7,6 +7,7 @@ target_link_libraries(http
 	PRIVATE
 		tcp
 		coroutine
+		logger
 )
 
 target_include_directories(http
