@@ -124,12 +124,6 @@ bool finished(routine_t id) {
 	return routine.finished;
 }
 
-void force_finish(routine_t id) {
-	auto& o = ordinator;
-	o.routines[id - 1].finished = true;
-	o.finished.emplace(id);
-}
-
 namespace
 {
 

@@ -49,11 +49,12 @@ void Worker::run() {
 			}
 			throw std::runtime_error("Epoll wait error: "s + std::strerror(errno));
 		}
-		if (recieved == 0) {
+		if (recieved == 0) { // handle timeouts
 			for(auto it = clients.begin(); it != clients.end(); ) {
 				if (handleClient(it->first)) {
 					it = clients.erase(it);
-				} else {
+				}
+				else {
 					++it;
 				}
 			}
@@ -75,10 +76,16 @@ void Worker::run() {
 		}
 	}
 	// close all clients
-	for(auto it = clients.begin(); it != clients.end(); ) {
-		::close(it->first);
-		Coroutine::force_finish(it->second.id);
-		it = clients.erase(it);
+	while (clients.size() != 0) {
+		for(auto it = clients.begin(); it != clients.end(); ) {
+			it->second.timed_out_ = true;
+			if (handleClient(it->first)) {
+				it = clients.erase(it);
+			}
+			else {
+				++it;
+			}
+		}
 	}
 }
 

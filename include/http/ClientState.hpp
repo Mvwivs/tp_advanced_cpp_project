@@ -17,6 +17,7 @@ struct ClientState {
 	bool keep_alive;
 	enum { ReadingRequest, WritingResponse } process_state;
 	std::chrono::time_point<std::chrono::system_clock> start;
+	bool timed_out_;
 
 	bool timed_out() const;
 
@@ -24,6 +25,7 @@ struct ClientState {
 	std::optional<std::string> readBody(int fd, std::size_t len, std::vector<char> body);
 	std::optional<http::HTTP::Request> readRequest(int fd);
 	bool sendResponse(int fd, const http::HTTP::Response& response);
+
 };
 
 }
