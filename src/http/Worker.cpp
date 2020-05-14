@@ -1,6 +1,13 @@
 
 #include "http/Worker.hpp"
 
+#include <cstring>
+
+#include <sys/epoll.h>
+#include <unistd.h>
+
+#include "coroutine/coroutine.h"
+
 using namespace std::string_literals;
 
 namespace http {
@@ -104,7 +111,6 @@ bool Worker::handleClient(int fd) {
 	}
 	int res = epoll_ctl(epoll.fd, EPOLL_CTL_MOD, fd, &e);
 	if (res == -1) {
-		std::cerr << std::strerror(errno) << std::endl;
 		throw std::runtime_error("Unable to re-add to epoll: "s + std::strerror(errno));
 	}
 	return false;

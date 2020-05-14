@@ -1,6 +1,12 @@
 
 #include "http/Server.hpp"
 
+#include <cstring>
+
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 using namespace std::string_literals;
 
 namespace http {

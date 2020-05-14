@@ -2,12 +2,10 @@
 #pragma once
 
 #include <string>
-#include <sstream>
-#include <vector>
 #include <optional>
+#include <vector>
+#include <string_view>
 #include <cstdint>
-#include <cctype>
-#include <stdexcept>
 
 namespace http {
 

@@ -1,8 +1,14 @@
 
 #pragma once
 
+#include <thread>
+#include <atomic>
+
+#include "tcp/connection_utils.hpp"
 #include "logger/Logger.hpp"
-#include "Worker.hpp"
+#include "http/HTTP.hpp"
+#include "http/Worker.hpp"
+#include "http/fd.hpp"
 
 namespace http {
 

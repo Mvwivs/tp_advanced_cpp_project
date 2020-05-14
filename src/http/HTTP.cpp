@@ -1,6 +1,11 @@
 
 #include "http/HTTP.hpp"
 
+#include <algorithm>
+#include <cctype>
+#include <stdexcept>
+#include <sstream>
+
 namespace http {
 
 bool iequals(const std::string& a, const std::string& b) {
