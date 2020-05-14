@@ -10,7 +10,7 @@ namespace http {
 
 bool iequals(const std::string& a, const std::string& b) {
     return std::equal(a.begin(), a.end(), b.begin(), b.end(),
-						[] (char a, char b) {
+						[] (char a, char b) { // ignore case
 							return std::tolower(a) == std::tolower(b);
 						});
 }
@@ -67,19 +67,19 @@ Request::Request(const std::string& data) {
 	}
 	startLine.method = *method;
 
-	std::size_t target_pos = line.find(' ', method_pos + 1);
+	std::size_t target_pos = line.find(' ', method_pos + 1); // target page
 	if (target_pos == std::string::npos) {
 		throw ParsingException("Method not found");
 	}
 	startLine.target = line.substr(method_pos + 1, target_pos - (method_pos + 1));
 
-	auto version = get_version(line.substr(target_pos + 1, line.size() - (target_pos + 1) - 1));
+	auto version = get_version(line.substr(target_pos + 1, line.size() - (target_pos + 1) - 1)); // version
 	if (!version) {
 		throw ParsingException("Wrong version");
 	}
 	startLine.version = *version;
 
-	while (std::getline(ss, line) && line != "\r") {
+	while (std::getline(ss, line) && line != "\r") { // parse headers
 		std::size_t sep_pos = line.find(':');
 		if (sep_pos == std::string::npos) {
 			throw ParsingException("Header separator not found");
@@ -88,18 +88,18 @@ Request::Request(const std::string& data) {
 			{line.substr(0, sep_pos), line.substr(sep_pos + 2, line.size() - (sep_pos + 2) - 1)});
 	}
 	
-	if (ss) {
+	if (ss) { // everything left is body
 		body = std::string(ss.str().substr(ss.tellg()));
 	}
 
-	if (method == Method::GET) {
+	if (method == Method::GET) {	// query params in GET
 		std::size_t param_pos = startLine.target.find('?');
 		if (param_pos != std::string::npos) {
 			parseParameters(startLine.target.substr(param_pos + 1));
 			startLine.target = startLine.target.substr(0, param_pos);
 		}
 	}
-	else if (method == Method::POST) {
+	else if (method == Method::POST) {	// query params for POST
 		try {
 			const std::string& type = getHeader("Content-Type");
 			if (type == "application/x-www-form-urlencoded" && body) {

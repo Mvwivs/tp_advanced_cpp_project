@@ -123,7 +123,7 @@ void Server::acceptClient() {
 			}
 		}
 
-		workers[(load_balancing++) % workers.size()].addClient(client_fd);
+		workers[(load_balancing++) % workers.size()].addClient(client_fd); // round-robin
 		return;
 	}
 }

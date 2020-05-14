@@ -14,8 +14,8 @@ namespace http {
 
 Worker::Worker(FormResponse_cb callback) :
 	running(false),
+	epoll(epoll_create1(0)),
 	formResponse(callback) {
-	epoll = std::move(fd_t{epoll_create1(0)});
 	if (!epoll) {
 		throw std::runtime_error("Unable to create epoll: "s + std::strerror(errno));
 	}
@@ -61,21 +61,21 @@ void Worker::run() {
 			continue;
 		}
 
-		for (int i = 0; i < recieved; ++i) {
+		for (int i = 0; i < recieved; ++i) { // loop epoll events
 			int fd = events[i].data.fd;
 
-			if (clients.find(fd) == clients.end()) {
+			if (clients.find(fd) == clients.end()) { // add client if not exists
 				Coroutine::routine_t id = Coroutine::create(
 					[this, fd] { this->serveClient(fd); });
 				clients.emplace(fd, ClientState{id});
 			}
-			bool erase = handleClient(fd);
-			if (erase) {
+			bool erase = handleClient(fd); // handle client data
+			if (erase) {	// erase if client finished
 				clients.erase(fd);
 			}
 		}
 	}
-	// close all clients
+	// close all clients on stop
 	while (clients.size() != 0) {
 		for(auto it = clients.begin(); it != clients.end(); ) {
 			it->second.timed_out_ = true;
@@ -95,7 +95,7 @@ void Worker::stop() {
 
 bool Worker::handleClient(int fd) {
 	ClientState& client = clients.at(fd);
-	Coroutine::resume(client.id);
+	Coroutine::resume(client.id);	// resume client coroutine
 	bool finished = Coroutine::finished(client.id);
 	if (finished) {
 		if (!client.keep_alive || client.timed_out()) { // close
@@ -103,14 +103,10 @@ bool Worker::handleClient(int fd) {
 			return true;
 		}
 	}
-	bool reading = true;
-	if (client.process_state == ClientState::WritingResponse) {
-		reading = false;
-	}
 
 	epoll_event e{};
 	e.data.fd = fd;
-	if (reading) {
+	if (client.process_state == ClientState::ReadingRequest) {
 		e.events = EPOLLIN | EPOLLET | EPOLLONESHOT;
 	}
 	else {
@@ -132,7 +128,6 @@ void Worker::serveClient(int fd) {
 		}
 
 		http::HTTP::Response response = formResponse(*request);
-
 		
 		client.process_state = ClientState::WritingResponse;
 

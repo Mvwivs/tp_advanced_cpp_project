@@ -42,7 +42,7 @@ ClientState::readHead(int fd) {
 			return {};
 		}
 		else if (recieved == -1) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) { // wait for more data
 				Coroutine::yield();
 				continue;
 			}
@@ -51,6 +51,7 @@ ClientState::readHead(int fd) {
 
 		full_data.insert(full_data.end(), buffer.begin(), buffer.begin() + recieved);
 
+		// check for http headers end
 		head_end = std::search(full_data.end() - recieved - 3, full_data.end(),
 			http::HTTP::end_seq.begin(), http::HTTP::end_seq.end());
 		if (head_end != full_data.end()) { // found \r\n\r\n in header
@@ -75,7 +76,7 @@ ClientState::readBody(int fd, std::size_t len, std::vector<char> body) {
 			return {};
 		}
 		else if (recieved == -1) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) { // wait for more data
 				Coroutine::yield();
 				continue;
 			}
@@ -97,7 +98,7 @@ std::optional<http::HTTP::Request> ClientState::readRequest(int fd) {
 
 	http::HTTP::Request request = http::HTTP::Request(
 		std::string(full_data.begin(), full_data.begin() + head_end));
-	try {
+	try { // check connection type
 		const std::string& type = request.getHeader("Connection");
 		if (type == "Keep-Alive") {
 			keep_alive = true;
@@ -105,7 +106,7 @@ std::optional<http::HTTP::Request> ClientState::readRequest(int fd) {
 	}
 	catch (const http::HTTP::ParsingException&) { // no keep-alive
 	}
-	try {
+	try { // try to read body
 		const std::string& len = request.getHeader("Content-Length");
 		std::size_t body_len = std::stoull(len);
 
@@ -129,7 +130,7 @@ bool ClientState::sendResponse(int fd, const http::HTTP::Response& response) {
 			return false;
 		}
 		ssize_t res = ::write(fd, resp_str.data() + written, resp_str.size() - written);
-		if (res == 0 || (res == -1 && errno == ECONNRESET)) {
+		if (res == 0 || (res == -1 && errno == ECONNRESET)) { // connection closed
 			throw std::runtime_error("Unable to write, EOF: "s + std::strerror(errno));
 		}
 		else if (res == -1) {
