@@ -6,7 +6,7 @@
 #include <unordered_map>
 
 #include "http/HTTP.hpp"
-#include "http/fd.hpp"
+#include "http/Fd.hpp"
 #include "http/ClientState.hpp"
 
 
@@ -41,7 +41,7 @@ private:
 private:
 	std::atomic_bool running;						// is working running
 	std::unordered_map<int, ClientState> clients;	// currently connected clints and their states
-	fd_t epoll;										// epoll for read/write data
+	Fd epoll;										// epoll for read/write data
 
 	FormResponse_cb formResponse;					// user callback forming response
 };

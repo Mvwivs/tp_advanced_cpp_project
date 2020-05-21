@@ -20,7 +20,7 @@ Server::Server(const tcp::Address& address, std::size_t worker_count):
 	running(false),
 	load_balancing(0) {
 	
-	epoll = std::move(fd_t{epoll_create1(0)});
+	epoll = std::move(Fd{epoll_create1(0)});
 	if (!epoll) {
 		throw std::runtime_error("Unable to create epoll: "s + std::strerror(errno));
 	}
@@ -78,7 +78,7 @@ void Server::stop() {
 }
 
 void Server::openServer(const tcp::Address& address) {
-	server = std::move(fd_t{socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)});
+	server = std::move(Fd{socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)});
 	if (!server) {
 		throw std::runtime_error("Unable to create server socket: "s + std::strerror(errno));
 	}

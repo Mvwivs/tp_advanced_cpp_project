@@ -1,7 +1,7 @@
 
 add_library(http
 		HTTP.cpp
-		fd.cpp
+		Fd.cpp
 		Worker.cpp
 		Server.cpp
 		ClientState.cpp

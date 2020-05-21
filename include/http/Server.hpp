@@ -8,7 +8,7 @@
 #include "logger/Logger.hpp"
 #include "http/HTTP.hpp"
 #include "http/Worker.hpp"
-#include "http/fd.hpp"
+#include "http/Fd.hpp"
 
 namespace http {
 
@@ -39,8 +39,8 @@ public:
 
 private:
 	std::atomic_bool running;		// is server running
-	fd_t server;					// server socket
-	fd_t epoll;						// server epoll for client connecting events
+	Fd server;					// server socket
+	Fd epoll;						// server epoll for client connecting events
 
 	std::vector<Worker> workers;	// workers processing client requests
 	std::size_t load_balancing;		// counter for round-robin load balancing

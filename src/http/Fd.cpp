@@ -1,35 +1,35 @@
 
-#include "http/fd.hpp"
+#include "http/Fd.hpp"
 
 namespace http {
 
-fd_t::fd_t(): 
+Fd::Fd(): 
 	fd(-1) {
 }
 
-fd_t::fd_t(int new_fd):
+Fd::Fd(int new_fd):
 	fd(new_fd) {
 }
 
-fd_t::fd_t(fd_t&& other):
+Fd::Fd(Fd&& other):
 	fd(std::exchange(other.fd, -1)) {
 }
 
-fd_t& fd_t::operator=(fd_t&& other) {
+Fd& Fd::operator=(Fd&& other) {
 	close();
 	fd = std::exchange(other.fd, -1);
 	return *this;
 }
 
-fd_t::~fd_t() {
+Fd::~Fd() {
 	close();
 }
 
-fd_t::operator bool() const {
+Fd::operator bool() const {
 	return fd != -1;
 }
 
-void fd_t::close() {
+void Fd::close() {
 	if (fd != -1) {
 		::close(fd);
 		fd = -1;
