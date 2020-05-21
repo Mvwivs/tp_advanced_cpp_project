@@ -18,9 +18,9 @@ Server::Server(const tcp::Address& address, std::size_t worker_count):
 	file_log(logger::create_file_logger("server.log")),
 
 	running(false),
+	epoll(epoll_create1(0)),
 	load_balancing(0) {
 	
-	epoll = std::move(Fd{epoll_create1(0)});
 	if (!epoll) {
 		throw std::runtime_error("Unable to create epoll: "s + std::strerror(errno));
 	}
