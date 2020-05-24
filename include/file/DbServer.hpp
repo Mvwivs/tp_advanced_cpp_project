@@ -7,22 +7,20 @@
 #include <optional>
 
 #include "http/Server.hpp"
+#include "DbData.hpp"
 #include "MmapArray.hpp"
+#include "Index.hpp"
 
 namespace file {
 
 using namespace std::string_literals;
 
-struct Data {
-	std::uint8_t payload[20];
-
-};
-
 class DbServer : public http::Server {
 public:
 	DbServer(const tcp::Address& address, const std::filesystem::path& file) :
 		http::Server(address),
-		db(file) {
+		db(file),
+		index(db, step) {
 	}
 	~DbServer() = default;
 
@@ -59,7 +57,11 @@ public:
 
 private:
 	std::optional<Data> getData(std::uint64_t key) const {
-		auto it = std::lower_bound(db.begin(), db.end(), key, 
+		const auto& [start, end] = index.getInterval(key);
+		if (start == std::size_t(-1)) {
+			return {};
+		}
+		auto it = std::lower_bound(db.begin() + start, db.begin() + end, key, 
 			[] (const std::pair<std::uint64_t, Data>& a, std::uint64_t b) {
 				return a.first < b;
 			});
@@ -80,7 +82,9 @@ private:
 
 private:
 	MmapArray<std::pair<std::uint64_t, Data>> db;
+	Index index;
 
+	static const std::size_t step = 1024;
 };
 
 }

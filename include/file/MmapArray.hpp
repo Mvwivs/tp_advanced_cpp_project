@@ -20,6 +20,10 @@ public:
 	MmapArray() = delete;
 	~MmapArray() = default;
 
+	std::size_t size() const {
+		return length;
+	}
+
 	iterator begin() {
 		return data;
 	}
