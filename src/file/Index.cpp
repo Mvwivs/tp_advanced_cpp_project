@@ -18,7 +18,7 @@ Index::Index(const MmapArray<Record>& db, std::size_t step):
 
 std::pair<std::size_t, std::size_t> Index::getInterval(std::uint64_t key) const {
 	if (key < index.begin()->first || key > std::prev(index.end())->first) { // out of bounds
-		return { -1, -1 };
+		return { npos, npos };
 	}
 	auto blockStart =  index.upper_bound(key);
 	if (blockStart == index.end()) {

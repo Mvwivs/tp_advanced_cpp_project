@@ -2,6 +2,7 @@
 #pragma once
 
 #include <map>
+#include <cstdint>
 
 #include "MmapArray.hpp"
 #include "DbData.hpp"
@@ -16,6 +17,7 @@ public:
 	~Index() = default;
 
 	std::pair<std::size_t, std::size_t> getInterval(std::uint64_t key) const;
+	static const std::size_t npos = -1;
 
 private:
 	std::map<Key, std::size_t> index;

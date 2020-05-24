@@ -3,19 +3,10 @@
 
 #include <iostream>
 #include <filesystem>
-#include <stdexcept>
-#include <cstring>
-
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
 
 #include "http/Fd.hpp"
 
 namespace file {
-
-using namespace std::string_literals;
 
 class MmapFile {
 public:

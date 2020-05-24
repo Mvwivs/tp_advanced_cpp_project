@@ -1,6 +1,14 @@
 
 #include "file/MmapFile.hpp"
 
+#include <stdexcept>
+#include <cstring>
+
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+
 namespace file {
 
 using namespace std::string_literals;

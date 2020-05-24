@@ -1,6 +1,9 @@
 
 #include "file/DbServer.hpp"
 
+#include <sstream>
+#include <algorithm>
+
 namespace file {
 
 using namespace std::string_literals;
@@ -44,7 +47,7 @@ http::HTTP::Response DbServer::onRequest(const http::HTTP::Request& request) {
 
 std::optional<Data> DbServer::getData(std::uint64_t key) const {
 	const auto& [start, end] = index.getInterval(key);
-	if (start == std::size_t(-1)) {
+	if (start == Index::npos) {
 		return {};
 	}
 	auto it = std::lower_bound(db.begin() + start, db.begin() + end, key, 

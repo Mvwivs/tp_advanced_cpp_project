@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "MmapFile.hpp"
 
 namespace file {

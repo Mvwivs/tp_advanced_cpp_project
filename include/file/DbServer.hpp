@@ -2,8 +2,6 @@
 #pragma once
 
 #include <cstdint>
-#include <sstream>
-#include <algorithm>
 #include <optional>
 
 #include "http/Server.hpp"
@@ -12,8 +10,6 @@
 #include "Index.hpp"
 
 namespace file {
-
-using namespace std::string_literals;
 
 class DbServer : public http::Server {
 public:
