@@ -1,6 +1,8 @@
 
 add_library(file
-		tmp.cpp
+		DbServer.cpp
+		Index.cpp
+		MmapFile.cpp
 )
 
 target_link_libraries(file
