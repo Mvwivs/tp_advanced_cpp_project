@@ -8,6 +8,7 @@
 
 namespace file {
 
+// Maps file to memory
 class MmapFile {
 public:
 	MmapFile() = delete;
@@ -15,14 +16,15 @@ public:
 
 	~MmapFile();
 
+	// Get file size
 	std::size_t size() const;
-
+	// Get pointer to file in memory
 	void* mmap();
 
 private:
-	http::Fd file_fd;
-	void* mmap_;
-	std::size_t size_;
+	http::Fd file_fd;	// File descriptor for open file
+	void* mmap_;		// Pointer to mapped file in memory
+	std::size_t size_;	// File size
 
 };
 

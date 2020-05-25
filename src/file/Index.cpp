@@ -3,8 +3,7 @@
 
 namespace file {
 
-Index::Index(const MmapArray<Record>& db, std::size_t step):
-	step_(step) {
+Index::Index(const MmapArray<Record>& db, std::size_t step) {
 	for (std::size_t i = 0; i < db.size(); i += step) {
 		const auto& [key, data] = *(db.begin() + i);
 		index.emplace(key, i);
@@ -18,7 +17,7 @@ Index::Index(const MmapArray<Record>& db, std::size_t step):
 
 std::pair<std::size_t, std::size_t> Index::getInterval(std::uint64_t key) const {
 	if (key < index.begin()->first || key > std::prev(index.end())->first) { // out of bounds
-		return { npos, npos };
+		return { Index::npos, Index::npos };
 	}
 	auto blockStart =  index.upper_bound(key);
 	if (blockStart == index.end()) {
@@ -26,5 +25,7 @@ std::pair<std::size_t, std::size_t> Index::getInterval(std::uint64_t key) const 
 	}
 	return { std::prev(blockStart)->second, blockStart->second };
 }
+
+const std::size_t Index::npos = -1;
 
 }

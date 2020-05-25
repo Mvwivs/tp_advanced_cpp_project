@@ -7,6 +7,7 @@
 
 namespace file {
 
+// Memory map array. Opens file and treats its content as array of `Data`
 template <typename Data>
 class MmapArray {
 public:
@@ -17,17 +18,22 @@ public:
 	MmapArray() = delete;
 	~MmapArray() = default;
 
+	// Get array size
 	std::size_t size() const;
 
+	// Iterator to first element
 	iterator begin();
+	// Iterator to element past last
 	iterator end();
+	// Iterator to first element
 	const_iterator begin() const;
+	// Iterator to element past last
 	const_iterator end() const;
 
 private:
-	MmapFile file_;
-	Data* data;
-	std::size_t length;
+	MmapFile file_;		// Memory mapped file
+	Data* data;			// Pointer to data in memory
+	std::size_t length;	// Array size
 
 };
 

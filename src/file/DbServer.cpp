@@ -8,6 +8,8 @@ namespace file {
 
 using namespace std::string_literals;
 
+constexpr std::size_t step = 1024;
+
 DbServer::DbServer(const tcp::Address& address, const std::filesystem::path& file) :
 	http::Server(address),
 	db(file),
