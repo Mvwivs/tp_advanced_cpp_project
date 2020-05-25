@@ -6,6 +6,7 @@
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 
 using namespace std::string_literals;
 
@@ -87,6 +88,10 @@ void Server::openServer(const tcp::Address& address) {
 	int res = setsockopt(server.fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
 	if (res == -1) {
 		throw std::runtime_error("Unable to set SO_REUSEADDR for server socket: "s + std::strerror(errno));
+	}
+	res = setsockopt(server.fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &enable, sizeof(enable));
+	if (res == -1) {
+		throw std::runtime_error("Unable to set TCP_DEFER_ACCEPT for server socket: "s + std::strerror(errno));
 	}
 
 	sockaddr_in local_address{};

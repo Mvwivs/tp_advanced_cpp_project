@@ -96,8 +96,14 @@ std::optional<http::HTTP::Request> ClientState::readRequest(int fd) {
 	}
 	auto& [full_data, head_end] = *head;
 
-	http::HTTP::Request request = http::HTTP::Request(
-		std::string(full_data.begin(), full_data.begin() + head_end));
+	http::HTTP::Request request;
+	try {
+		request = http::HTTP::Request(
+			std::string(full_data.begin(), full_data.begin() + head_end));
+	}
+	catch (const http::HTTP::ParsingException&) {
+		return {};
+	}
 	try { // check connection type
 		const std::string& type = request.getHeader("Connection");
 		if (type == "Keep-Alive") {
